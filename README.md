@@ -22,7 +22,7 @@ App para peluquerías, centros de estilistas y salones de uñas. Un solo archivo
 ## Demo
 
 - Clienta demo: botón "Probar como clienta demo" (sofia@demo.com / 1234)
-- Salón: "Acceso salón" → usuario `salon` / contraseña `admin` (cambiarlos en Ajustes)
+- Salón: email `salon@demo.com` (o usuario `salon`) / contraseña `admin`. Se puede entrar desde "Ingresar" o desde "Acceso salón". Cambiarlos en Ajustes → Acceso al panel.
 
 ## Importante
 

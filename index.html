@@ -504,7 +504,7 @@ function vAuth(){
     <p class="lead">Panel para gestionar turnos, clientes, pasaporte de color y la tienda.</p>
   </section>
   <form data-form="salonLogin" class="fade-in">
-    <label class="field"><span>Usuario</span><input name="user" required autocomplete="username" autocapitalize="none"></label>
+    <label class="field"><span>Email o usuario</span><input name="user" required autocomplete="username" autocapitalize="none"></label>
     <label class="field"><span>Contraseña</span><input name="pass" type="password" required autocomplete="current-password"></label>
     <button class="btn" type="submit">${ic('cog',18)} Entrar al panel</button>
   </form></main></div>`;
@@ -519,8 +519,8 @@ function vAuth(){
   <form data-form="${reg?'register':'login'}" class="fade-in">
     ${reg?`<label class="field"><span>Nombre y apellido</span><input name="name" required autocomplete="name"></label>
     <label class="field"><span>Celular</span><input name="phone" inputmode="tel" autocomplete="tel"></label>`:''}
-    <label class="field"><span>Email</span><input name="email" type="email" required autocomplete="email"></label>
-    <label class="field"><span>Contraseña</span><input name="pass" type="password" required minlength="4" autocomplete="${reg?'new-password':'current-password'}"></label>
+    <label class="field"><span>${reg?'Email':'Email o usuario'}</span><input name="email" type="${reg?'email':'text'}" required autocomplete="${reg?'email':'username'}" autocapitalize="none"></label>
+    <label class="field"><span>Contraseña</span><input name="pass" type="password" required ${reg?'minlength="4"':''} autocomplete="${reg?'new-password':'current-password'}"></label>
     <button class="btn accent" type="submit">${reg?'Crear mi cuenta':'Entrar'} ${ic('arrow',18)}</button>
   </form>
   <div class="links"><button data-a="demo" data-who="u1">Probar como clienta demo</button><button class="acc" data-a="authMode" data-m="salon">${'Acceso salón →'}</button></div>
@@ -792,6 +792,7 @@ function aSettings(){
     <div class="grid2f"><label class="field"><span>Teléfono</span><input name="phone" value="${esc(s.phone||'')}"></label><label class="field"><span>Cambios hasta (hs antes)</span><input type="number" name="cancelHours" min="0" max="72" value="${s.cancelHours}"></label></div>
     <label class="field"><span>Dirección</span><input name="address" value="${esc(s.address||'')}"></label>
     <p class="cat">Acceso al panel</p>
+    <label class="field"><span>Email de acceso</span><input name="aemail" type="email" value="${esc((S.users.find(u=>u.role==='admin')||{}).email||'')}" required autocapitalize="none"></label>
     <div class="grid2f"><label class="field"><span>Usuario</span><input name="ausername" value="${esc((S.users.find(u=>u.role==='admin')||{}).username||'')}" required autocapitalize="none"></label><label class="field"><span>Nueva contraseña</span><input name="apass" type="password" minlength="4" placeholder="Dejar vacío = igual" autocomplete="new-password"></label></div>
     <p class="cat">Servicios y precios</p>
     ${S.services.map(x=>`<div class="svcedit"><input name="sname_${x.id}" value="${esc(x.name)}"><input name="sprice_${x.id}" type="number" min="0" step="100" value="${x.price}"></div>`).join('')}
@@ -1050,8 +1051,9 @@ const F={
     notify('admin',`Nuevo pedido online de ${o.guest.name} (sin cuenta) · ${money(total)} · Tel. ${o.guest.phone}`,'bag');
     ui.cart={};ui.modal={type:'orderOk',id:o.id};save();render();
   },
-  login:d=>{const u=S.users.find(x=>x.role==='client'&&x.email.toLowerCase()===d.email.trim().toLowerCase()&&x.pass===d.pass);
-    if(!u)return toast('Email o contraseña incorrectos');S.session=u.id;ui.tab='home';save();render();toast('Hola, '+first(u.name))},
+  login:d=>{const id=d.email.trim().toLowerCase();
+    const u=S.users.find(x=>(x.email.toLowerCase()===id||String(x.username||'').toLowerCase()===id)&&x.pass===d.pass);
+    if(!u)return toast('Email/usuario o contraseña incorrectos');S.session=u.id;ui.tab='home';ui.atab='agenda';save();render();toast(u.role==='admin'?'Bienvenido al panel':'Hola, '+first(u.name))},
   register:d=>{const email=d.email.trim().toLowerCase();
     if(S.users.some(x=>x.email.toLowerCase()===email))return toast('Ya existe una cuenta con ese email');
     const u={id:uid('u'),email,pass:d.pass,name:d.name.trim(),phone:d.phone||'',role:'client',since:today()};
@@ -1070,7 +1072,7 @@ const F={
   product:d=>{S.products.push({id:uid('p'),name:d.name,brand:d.brand,cat:d.cat,price:Number(d.price),stock:Number(d.stock),c:d.c,shape:d.shape});ui.modal=null;save();render();toast('Producto agregado')},
   settings:d=>{Object.assign(S.salon,{name:d.name,open:d.open,close:d.close,phone:d.phone,address:d.address,cancelHours:Number(d.cancelHours)||0});
     S.services.forEach(x=>{if(d['sname_'+x.id])x.name=d['sname_'+x.id];if(d['sprice_'+x.id]!==undefined)x.price=Number(d['sprice_'+x.id])||0});
-    const adm=S.users.find(u=>u.role==='admin');if(adm){adm.username=d.ausername.trim().toLowerCase();if(d.apass&&d.apass.length>=4)adm.pass=d.apass}
+    const adm=S.users.find(u=>u.role==='admin');if(adm){const em=(d.aemail||'').trim().toLowerCase();if(em&&S.users.some(u=>u!==adm&&u.email.toLowerCase()===em))return toast('Ese email ya lo usa una clienta');if(em)adm.email=em;adm.username=d.ausername.trim().toLowerCase();if(d.apass&&d.apass.length>=4)adm.pass=d.apass}
     save();render();toast('Cambios guardados')}
 };
 
