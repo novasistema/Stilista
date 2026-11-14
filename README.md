@@ -13,11 +13,17 @@ App para peluquerías, centros de estilistas y salones de uñas. Un solo archivo
 - Tienda online con retiro en el salón (también sin cuenta)
 - Pasaporte de color: historial de tonos, fórmulas y esmaltes
 
+**Estilos:** Salón (peluquería, color, uñas) o Barbería (corte, degradé, barba). Se elige en Ajustes, con datos de ejemplo de cada uno.
+
+**Avisos:** en la app (campanita y avisos del celular) y por WhatsApp con mensaje armado: turno confirmado, rechazado, horario propuesto, cancelado y recordatorio 30 minutos antes.
+
 **Para el salón** (acceso con usuario y contraseña)
 - Agenda del día y solicitudes de turno: aceptar, rechazar o proponer otro horario
 - Fichas de clientas y registro de cada servicio en su pasaporte
 - Pedidos y stock de la tienda
-- Ajustes: datos del salón, horarios, servicios y precios, datos para el pago, seña
+- Ajustes: estilo, datos del salón, horarios, servicios (agregar, quitar, precio y duración), datos para el pago, seña
+
+**Usuario creador:** controla el abono de cada comercio, avisa que pague y puede suspender o reactivar el servicio.
 
 ## Demo
 

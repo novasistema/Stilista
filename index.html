@@ -6,7 +6,7 @@
 <title>Stilista — Turnos, tienda y pasaporte de color</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#F4EEE6;--paper2:#EAE1D4;--card:#FBF8F3;--ink:#1E1A17;--ink2:#3a332d;--muted:#857a70;--line:#ddd2c4;
@@ -110,6 +110,8 @@ body.admin .dock button.on{color:#F1E9DE;background:#15120F}
 /* buttons */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:99px;background:var(--ink);color:var(--paper);font-weight:800;letter-spacing:.01em;text-align:center;transition:transform .15s}
 .btn:active{transform:scale(.98)}
+a.btn{text-decoration:none}
+.item .btn.sm{padding:9px 11px}
 .btn.accent{background:var(--accent);color:#fff}
 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .btn.sm{width:auto;padding:9px 15px;font-size:13px}
@@ -192,6 +194,8 @@ body.admin .dock button.on{color:#F1E9DE;background:#15120F}
 .check input{width:20px;height:20px;accent-color:var(--accent);flex:0 0 auto}
 .check small{display:block;font-weight:500;color:var(--muted);font-size:12px}
 .paytag{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:99px;margin-top:8px}
+.lic-activa{background:#dde7d8;color:#3a5632}.lic-aviso{background:#f5e3c4;color:#80520c}.lic-suspendida{background:#f3d3d3;color:#8a1f1f}
+.lockcard{border-radius:28px;padding:24px;background:var(--card);border:1px solid var(--line);margin-top:20px}
 .pt-pendiente{background:#f5e3c4;color:#80520c}.pt-informado{background:#dbe4f1;color:#2f4d78}.pt-pagado{background:#dde7d8;color:#3a5632}.pt-retiro{background:#e7e1da;color:#6d635a}
 .ticket .paytag{margin-top:10px}
 .policy{font-size:12.5px;color:var(--muted);margin:10px 2px 16px}
@@ -294,9 +298,53 @@ body.admin .dock button.on{color:#F1E9DE;background:#15120F}
 .tp i{width:22px;height:22px;border-radius:50%;background:var(--c);border:1px solid rgba(0,0,0,.08)}
 .tp.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .divider{height:1px;background:var(--line);margin:18px 0}
-.svcedit{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;margin-bottom:8px}
+.svcedit{display:grid;grid-template-columns:1fr 92px 78px 40px;gap:6px;align-items:center;margin-bottom:8px}
+.svcedit select{padding:10px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);width:100%}
+.svcedit .del{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.svchead{display:grid;grid-template-columns:1fr 92px 78px 40px;gap:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:6px}
 .svcedit input{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);width:100%}
 
+
+/* ===== estilo Barbería ===== */
+body.barber{--paper:#141312;--paper2:#201E1B;--card:#1B1917;--ink:#EEE7DC;--ink2:#CFC6B8;--muted:#9A9084;--line:#302C27;--accent:#C9973F;--blush:#3a2f1e;--serif:'Bebas Neue',Impact,'Arial Narrow',sans-serif}
+body.admin.barber{--paper:#101010;--card:#191817;--paper2:#1F1D1B;--accent:#D4A24C}
+.barber em{font-style:normal}
+.barber .display{font-weight:400;font-size:66px;line-height:.9;letter-spacing:.005em;text-transform:uppercase}
+.barber.guest .display,.barber .auth .display{font-size:84px}
+.barber .brand{font-style:normal;text-transform:uppercase;letter-spacing:.06em;font-size:26px}
+.barber .sec,.barber .tt,.barber .tl-t,.barber .tile .t,.barber .sheet h3,.barber .cat,.barber .req .what,.barber .stub .d,.barber .kpi b,.barber .timebox,.barber .prod .p,.barber .svc .price,.barber .total b,.barber .day b,.barber .tone-hero .code{font-weight:400;letter-spacing:.02em}
+.barber .cat{font-style:normal;text-transform:uppercase;font-size:20px;letter-spacing:.06em;color:var(--muted)}
+.barber .sec,.barber .tile .t,.barber .sheet h3,.barber .tt{text-transform:uppercase}
+.barber .note{font-family:var(--sans)}
+.barber .tile .t{font-size:28px;overflow-wrap:anywhere}
+.barber .tile .t.sm{font-size:22px}
+.barber .auth-hero{padding-bottom:44px}
+.barber .dock{background:rgba(238,231,220,.95)}
+.barber .dock button{color:rgba(20,19,18,.5)}
+.barber .dock button.on{color:#EEE7DC;background:#141312}
+.barber #toast{background:#EEE7DC;color:#141312}
+.barber .tile.big{color:#141312}.barber .tile.big .eyebrow{color:rgba(20,19,18,.65)}
+.barber .spin{fill:#141312}.barber .spin .core{stroke:#141312}
+.barber .btn.accent,.barber .slot.on,.barber .fab,.barber .req .av,.barber .dot,.barber .sec .count{color:#141312}
+.barber .tile.wide .eyebrow{color:rgba(20,19,18,.6)}
+.barber .st-realizado{background:#EEE7DC;color:#141312}
+.barber .orb{background:conic-gradient(from 0deg,#C9973F,#5a4a32,#2a2622,#8a6a3a,#C9973F);opacity:.35}
+.barber .auth-hero::after{content:'';position:absolute;left:0;right:0;bottom:6px;height:10px;border-radius:5px;background:repeating-linear-gradient(-45deg,#C9973F 0 12px,#EEE7DC 12px 24px,#8C2F39 24px 36px,#EEE7DC 36px 48px);opacity:.85}
+.barber .shopcta b em{color:#C9973F}
+.cuthero{border-radius:28px;padding:22px;background:var(--card);border:1px solid var(--line);margin-top:18px}
+.cuthero .big{font-family:var(--serif);font-size:56px;line-height:.95;text-transform:uppercase;color:var(--accent)}
+.cutgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.cutgrid div{background:var(--paper2);border-radius:14px;padding:10px 12px}
+.cutgrid span{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.cutgrid b{font-size:14px;display:block;margin-top:3px;line-height:1.25}
+.cuttags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cuttags span{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:99px;background:var(--paper2);border:1px solid var(--line)}
+.cuttags span i{font-style:normal;color:var(--muted);font-weight:600}
+.stylepick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stylecard{border-radius:18px;border:1.5px solid var(--line);padding:14px;background:var(--card);text-align:left}
+.stylecard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.stylecard .sw{display:flex;gap:4px;margin-bottom:10px}.stylecard .sw i{width:22px;height:22px;border-radius:6px}
+.stylecard b{display:block;font-size:15px}.stylecard small{color:var(--muted);font-size:12px}
 #toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-160%);background:#1E1A17;color:#F4EEE6;padding:12px 18px;border-radius:99px;font-weight:700;font-size:13.5px;z-index:99;transition:transform .4s cubic-bezier(.2,.8,.2,1);max-width:92%;text-align:center;box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
 body.admin #toast{background:#F1E9DE;color:#15120F}
 #toast.show{transform:translate(-50%,0)}
@@ -348,11 +396,12 @@ const NAILS=[
  {name:'Blanco leche',hex:'#f2ece4'},{name:'Chocolate',hex:'#4b2b22'}];
 
 /* ============ datos de ejemplo ============ */
+function defaultLicense(){return {status:'activa',due:iso(addD(new Date(),20)),amount:30000,informed:null,pay:{alias:'',cbu:'',holder:'',mpLink:'',note:''},history:[]}}
 function defaultPay(){return {cash:true,debit:true,transfer:true,mp:true,alias:'estudio.alma.mp',cbu:'0000003100012345678901',holder:'Estudio Alma',bank:'Mercado Pago',cuit:'',mpLink:'',depositOn:true,depositPct:30,note:'Enviá el comprobante por WhatsApp si te lo pedimos.'}}
 function seed(){
   const d0=nextOpen(0),d1=nextOpen(1),d2=nextOpen(2),d3=nextOpen(4);
   return {
-    salon:{name:'Estudio Alma',open:'09:00',close:'20:00',cancelHours:3,phone:'358 400-0000',address:'Av. Siempreviva 123',pay:defaultPay()},
+    salon:{name:'Estudio Alma',open:'09:00',close:'20:00',cancelHours:3,phone:'358 400-0000',address:'Av. Siempreviva 123',pay:defaultPay(),style:'salon'},
     services:[
       {id:'s1',name:'Corte & brushing',cat:'Pelo',dur:60,price:18000},
       {id:'s4',name:'Nutrición profunda',cat:'Pelo',dur:45,price:15000},
@@ -378,6 +427,7 @@ function seed(){
       {id:'p8',name:'Aceite de cutículas',brand:'Laca Studio',cat:'Uñas',price:5400,stock:0,c:'#d9a28c',shape:'polish'}],
     users:[
       {id:'admin',username:'salon',email:'salon@demo.com',pass:'admin',name:'Estudio Alma',role:'admin'},
+      {id:'creator',username:'creador',email:'creador@demo.com',pass:'creador',name:'Creador',role:'creator'},
       {id:'u1',email:'sofia@demo.com',pass:'1234',name:'Sofía Ramírez',phone:'358 412-3456',role:'client',since:ago(200)},
       {id:'u2',email:'valen@demo.com',pass:'1234',name:'Valentina Gómez',phone:'358 498-1122',role:'client',since:ago(90)},
       {id:'u3',email:'juli@demo.com',pass:'1234',name:'Julieta Pérez',phone:'358 455-7788',role:'client',since:ago(150)}],
@@ -401,14 +451,75 @@ function seed(){
       {id:'n3',to:'admin',text:'Nuevo pedido de Valentina Gómez · $32.000',ts:Date.now()-7200e3,read:true,icon:'bag'},
       {id:'n4',to:'u1',text:'¡Tu turno está confirmado! Matiz & gloss el '+fd(d2)+' a las 10:00 hs con Lucía.',ts:Date.now()-80000e3,read:false,icon:'check'},
       {id:'n5',to:'u1',text:'Sumamos un registro a tu pasaporte de color ✦',ts:Date.now()-25*864e5,read:true,icon:'drop'}],
+    license:defaultLicense(),
     session:null
   };
+}
+function seedBarber(){
+  const d0=nextOpen(0),d1=nextOpen(1),d2=nextOpen(2);
+  return {
+    services:[
+      {id:'b1',name:'Corte clásico',cat:'Corte',dur:40,price:12000},
+      {id:'b2',name:'Fade / degradé',cat:'Corte',dur:45,price:14000},
+      {id:'b3',name:'Corte + barba',cat:'Corte',dur:60,price:18000},
+      {id:'b6',name:'Corte niño',cat:'Corte',dur:30,price:9000},
+      {id:'b4',name:'Perfilado de barba',cat:'Barba',dur:30,price:8000},
+      {id:'b5',name:'Afeitado a navaja con toalla caliente',cat:'Barba',dur:40,price:11000}],
+    staff:[
+      {id:'t1',name:'Nico',role:'Barbero',cats:['Corte','Barba'],c:'#C9973F'},
+      {id:'t2',name:'Leo',role:'Barbero',cats:['Corte','Barba'],c:'#7F8C8D'},
+      {id:'t3',name:'Fran',role:'Barbero',cats:['Corte'],c:'#A0522D'}],
+    products:[
+      {id:'bp1',name:'Pomada mate fijación fuerte',brand:'Roble',cat:'Peinado',price:13500,stock:10,c:'#3d3a36',shape:'jar'},
+      {id:'bp2',name:'Cera brillo',brand:'Roble',cat:'Peinado',price:11800,stock:7,c:'#8a6a3a',shape:'jar'},
+      {id:'bp3',name:'Aceite para barba',brand:'Navaja',cat:'Barba',price:12900,stock:8,c:'#b07a2e',shape:'polish'},
+      {id:'bp4',name:'Bálsamo para barba',brand:'Navaja',cat:'Barba',price:12400,stock:5,c:'#6b4a2b',shape:'jar'},
+      {id:'bp5',name:'Shampoo anticaspa',brand:'Roble',cat:'Shampoo',price:10900,stock:9,c:'#2f4b5c',shape:'bottle'},
+      {id:'bp6',name:'After shave',brand:'Navaja',cat:'Barba',price:9800,stock:0,c:'#4d6b62',shape:'spray'}],
+    clients:[
+      {id:'u1',email:'tomas@demo.com',pass:'1234',name:'Tomás Ruiz',phone:'358 412-3456',role:'client',since:ago(200)},
+      {id:'u2',email:'joaco@demo.com',pass:'1234',name:'Joaquín Díaz',phone:'358 498-1122',role:'client',since:ago(90)},
+      {id:'u3',email:'martin@demo.com',pass:'1234',name:'Martín Sosa',phone:'358 455-7788',role:'client',since:ago(150)}],
+    appts:[
+      {id:'a1',userId:'u1',serviceId:'b3',staffId:'t1',date:d2,time:'10:00',status:'confirmado',created:Date.now()-864e5},
+      {id:'a2',userId:'u2',serviceId:'b2',staffId:'t2',date:d1,time:'16:00',status:'pendiente',note:'Quiero probar un fade alto',created:Date.now()-3600e3},
+      {id:'a3',userId:'u3',serviceId:'b1',staffId:'t1',date:d0,time:'18:00',status:'confirmado',created:Date.now()-2*864e5},
+      {id:'a5',userId:'u2',serviceId:'b4',staffId:'t2',date:d0,time:'14:00',status:'confirmado',created:Date.now()-3*864e5}],
+    records:[
+      {id:'r1',userId:'u1',date:ago(70),serviceId:'b3',staffId:'t1',cut:{style:'Fade medio',machine:'Costados 1 · arriba tijera 3 cm',fade:'Medio',beard:'Barba corta'},notes:'Le gusta la línea de la nuca bien marcada.'},
+      {id:'r2',userId:'u1',date:ago(35),serviceId:'b2',staffId:'t1',cut:{style:'Fade alto',machine:'Costados 0,5 · arriba 2',fade:'Skin (a cero)',beard:'Perfilado'},notes:''},
+      {id:'r3',userId:'u2',date:ago(20),serviceId:'b1',staffId:'t2',cut:{style:'Clásico',machine:'Costados 3 · arriba tijera',fade:'Sin degradé',beard:'Sin barba'},notes:'Raya al costado izquierdo.'}],
+    orders:[{id:'o1',userId:'u2',items:[{pid:'bp1',qty:1},{pid:'bp3',qty:1}],total:26400,status:'nuevo',ts:Date.now()-7200e3,pay:{method:'cash',status:'retiro'}}],
+    notifs:[{id:'n1',to:'admin',text:'Joaquín Díaz solicitó Fade / degradé para el '+fd(d1)+' a las 16:00',ts:Date.now()-3600e3,read:false,icon:'plus'}]
+  };
+}
+function loadSample(kind){
+  const src=kind==='barber'?seedBarber():(()=>{const x=seed();return {services:x.services,staff:x.staff,products:x.products,clients:x.users.filter(u=>u.role==='client'),appts:x.appts,records:x.records,orders:x.orders,notifs:x.notifs}})();
+  const admin=S.users.find(u=>u.role==='admin');
+  Object.assign(S,{services:src.services,staff:src.staff,products:src.products,users:[...S.users.filter(u=>u.role!=='client'),...src.clients],appts:src.appts,records:src.records,orders:src.orders,notifs:src.notifs});
+  S.salon.style=kind;
+  if(kind==='barber'&&S.salon.name==='Estudio Alma')S.salon.name='Barbería Roble';
+  if(kind==='salon'&&S.salon.name==='Barbería Roble')S.salon.name='Estudio Alma';
+  ui.cart={};ui.clientId=null;ui.book=null;
 }
 let S;
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return seed()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 S=load();
 if(!S.salon.pay)S.salon.pay=defaultPay();
+if(!S.salon.style)S.salon.style='salon';
+if(!S.license)S.license=defaultLicense();
+if(!S.users.some(u=>u.role==='creator'))S.users.push({id:'creator',username:'creador',email:'creador@demo.com',pass:'creador',name:'Creador',role:'creator'});
+const LIC={activa:'Activa',aviso:'Pago pendiente',suspendida:'Suspendida'};
+const licState=()=>S.license.status==='suspendida'?'suspendida':(S.license.status==='aviso'||today()>S.license.due)?'aviso':'activa';
+const OFF=()=>licState()==='suspendida';
+const BAR=()=>S.salon.style==='barber';
+const W=(f,m)=>BAR()?m:f;
+const LS=()=>W('el salón','la barbería'),CS=()=>W('El salón','La barbería');
+const APP=()=>BAR()?'Stilista Barber':'Stilista';
+const CUTS=['Clásico','Fade bajo','Fade medio','Fade alto','Taper','Buzz cut','Crop texturizado','Pompadour','Mullet'];
+const FADES=['Sin degradé','Bajo','Medio','Alto','Skin (a cero)'];
+const BEARDS=['Sin barba','Perfilado','Barba corta','Barba completa','Afeitado a navaja'];
 (()=>{const a=S.users.find(u=>u.role==='admin');if(a&&!a.username)a.username='salon'})();
 
 const me=()=>S.users.find(u=>u.id===S.session);
@@ -419,12 +530,37 @@ const prodBy=id=>S.products.find(p=>p.id===id);
 const getA=id=>S.appts.find(a=>a.id===id);
 const dt=a=>pISO(a.date).getTime()+toMin(a.time)*60000;
 const canChange=a=>dt(a)-Date.now()>S.salon.cancelHours*3600e3;
-function notify(to,text,icon='bell'){S.notifs.unshift({id:uid('n'),to,text,ts:Date.now(),read:false,icon})}
+function notify(to,text,icon='bell'){S.notifs.unshift({id:uid('n'),to,text,ts:Date.now(),read:false,icon});
+  const u=me();if(u&&(to===u.id||(to==='admin'&&u.role==='admin')))pushLocal(text)}
+function pushLocal(text){try{if('Notification' in window&&Notification.permission==='granted')new Notification(S.salon.name,{body:text})}catch(e){}}
+const notifState=()=>{try{return 'Notification' in window?Notification.permission:'unsupported'}catch(e){return 'unsupported'}};
+function appUrl(){try{const h=location.hostname;if(/^https?:$/.test(location.protocol)&&h&&!/claude|anthropic|usercontent|localhost/.test(h))return location.origin}catch(e){}return ''}
+function waText(phone,text){const l=waLink(phone);return l?l+'?text='+encodeURIComponent(text):''}
+function apptMsg(kind,a,extra){
+  const c=userBy(a.userId),s=svc(a.serviceId),st=staffBy(a.staffId),n=first(c.name),sal=S.salon.name,url=appUrl();
+  const when=`${fd(a.date)} a las ${a.time} hs`,with_=st?` con ${st.name}`:'',app=url?` ${url}`:' la app';
+  const m={
+    confirmado:`Hola ${n}! ✅ Tu turno en ${sal} está CONFIRMADO: ${s.name} el ${when}${with_}. Si necesitás cambiarlo o cancelarlo, hacelo desde${app}.`,
+    rechazado:`Hola ${n}. Lamentablemente no tenemos lugar para ${s.name} el ${when}. Elegí otro horario desde${app} y te lo confirmamos. ${sal}`,
+    cambioRechazado:`Hola ${n}. No pudimos pasar tu turno al nuevo horario: sigue el ${when}${with_}. ${sal}`,
+    propuesto:`Hola ${n}! Para ${s.name} te proponemos el ${when}${with_}. Entrá a${app} para aceptarlo o elegir otro. ${sal}`,
+    cancelado:`Hola ${n}. ${sal} tuvo que cancelar tu turno de ${s.name} del ${when}.${extra?' '+extra:''} Podés reservar otro desde${app}.`,
+    recordatorio:`Hola ${n}! ⏰ Te recordamos tu turno de hoy a las ${a.time} hs: ${s.name}${with_} en ${sal}. ¡Te esperamos!`
+  };return m[kind]||'';
+}
+function offerWa(a,kind,extra){const c=userBy(a.userId);const t=apptMsg(kind,a,extra);if(c.phone&&t){ui.modal={type:'wa',id:a.id,kind,text:t}}else ui.modal=null}
+function minsTo(a){return Math.round((dt(a)-Date.now())/60000)}
+function checkReminders(){
+  const u=me();if(!u||u.role!=='client')return;let changed=false;
+  S.appts.forEach(a=>{if(a.userId===u.id&&a.status==='confirmado'&&!a.rem30){const mm=minsTo(a);if(mm>0&&mm<=30){a.rem30=true;changed=true;
+    notify(u.id,`⏰ Recordatorio: tu turno de ${svc(a.serviceId).name} es hoy a las ${a.time} hs (en ${mm} min). ¡Te esperamos!`,'clock');toast(`⏰ Tu turno es en ${mm} min`)}}});
+  if(changed){save();render()}
+}
 const ACTIVE=['pendiente','propuesto','confirmado'];
 const STL={pendiente:'Esperando confirmación',propuesto:'Nuevo horario propuesto',confirmado:'Confirmado',cancelado:'Cancelado',rechazado:'Sin disponibilidad',realizado:'Realizado'};
 const orderName=o=>o.guest?o.guest.name:userBy(o.userId).name;
 const waLink=ph=>{let d=String(ph||'').replace(/\D/g,'');if(!d)return'';if(!d.startsWith('54'))d='549'+d;return 'https://wa.me/'+d};
-const PM=[['cash','Efectivo en el salón'],['debit','Débito / crédito en el salón'],['transfer','Transferencia'],['mp','Mercado Pago']];
+const PM=[['cash','Efectivo en el local'],['debit','Débito / crédito en el local'],['transfer','Transferencia'],['mp','Mercado Pago']];
 const PML=Object.fromEntries(PM);
 const ONLINE=['transfer','mp'];
 const PST={pendiente:'Pago pendiente',informado:'Pago informado · a verificar',pagado:'Pago recibido ✓',retiro:'Paga al retirar'};
@@ -437,7 +573,7 @@ function payBox(method,amount){
   const p=S.salon.pay;let h='';
   if(method==='transfer')h=`<p class="eyebrow">Transferí ${money(amount)} a</p>${pl('Alias',p.alias)}${pl('CBU/CVU',p.cbu)}${pl('Titular',p.holder)}${pl('Banco',p.bank)}${pl('CUIT',p.cuit)}`;
   else if(method==='mp')h=`<p class="eyebrow">Pagá ${money(amount)} con Mercado Pago</p>${p.mpLink?`<a class="btn accent" style="margin:6px 0 4px" href="${esc(p.mpLink)}" target="_blank" rel="noopener">Abrir link de pago</a>`:''}${pl(p.mpLink?'O al alias':'Alias',p.alias)}`;
-  else h=`<p class="eyebrow">${esc(PML[method]||'')}</p><p class="small">Pagás ${money(amount)} cuando retirás en el salón.</p>`;
+  else h=`<p class="eyebrow">${esc(PML[method]||'')}</p><p class="small">Pagás ${money(amount)} cuando retirás en ${LS()}.</p>`;
   return `<div class="paybox">${h}${p.note&&ONLINE.includes(method)?`<p class="paynote">${esc(p.note)}</p>`:''}</div>`;
 }
 function methodPicker(list){const cur=curMethod(list);return `<div class="tpick">${list.map(k=>`<button type="button" class="tp ${k===cur?'on':''}" data-a="payM" data-m="${k}" style="padding:9px 14px">${esc(PML[k])}</button>`).join('')}</div>`}
@@ -477,6 +613,9 @@ const I={
  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
  x:'<path d="M6 6l12 12M18 6 6 18"/>',check:'<path d="M5 12.5 10 17 19 7"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 7.5 20 18M8.5 16.5 20 6"/>',
+ wa:'<path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 10c.5 2 2 3.5 4 4"/>',
+ bellr:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/><path d="M3 5l2 2M21 5l-2 2"/>',
  sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'};
 const ic=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${I[n]||I.bell}</svg>`;
 
@@ -487,8 +626,8 @@ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.
 
 function render(){
   const u=me();
-  document.body.className=u?(u.role==='admin'?'admin':'client'):'guest';
-  document.getElementById('root').innerHTML=!u?(ui.guestShop?vGuestShop():vAuth()):u.role==='admin'?vAdmin(u):vClient(u);
+  document.body.className=(u?(u.role==='admin'?'admin':'client'):'guest')+(BAR()?' barber':'');
+  document.getElementById('root').innerHTML=!u?(ui.guestShop&&!OFF()?vGuestShop():vAuth()):u.role==='creator'?vCreator(u):u.role==='admin'?(OFF()?vLocked(u):vAdmin(u)):(OFF()?vClientOff(u):vClient(u));
   document.getElementById('modal').innerHTML=ui.modal?`<div class="scrim" data-scrim="1"><div class="sheet"><div class="grab"></div>${vModal(u)}</div></div>`:'';
 }
 
@@ -499,9 +638,9 @@ function vAuth(){
   if(sal)return `<div class="shell auth"><main>
   <section class="auth-hero"><div class="orb"></div>
     <button class="back" data-a="authMode" data-m="login">${ic('back',14)} Volver</button>
-    <div class="brand" style="margin-top:14px">Stilista<small>${esc(S.salon.name)}</small></div>
-    <h1 class="display" style="margin-top:30px">Acceso<br><em>del salón.</em></h1>
-    <p class="lead">Panel para gestionar turnos, clientes, pasaporte de color y la tienda.</p>
+    <div class="brand" style="margin-top:14px">${APP()}<small>${esc(S.salon.name)}</small></div>
+    <h1 class="display" style="margin-top:30px">Acceso<br><em>${W('del salón','de la barbería')}.</em></h1>
+    <p class="lead">Panel para gestionar turnos, clientes, ${W('pasaporte de color','historial de cortes')} y la tienda.</p>
   </section>
   <form data-form="salonLogin" class="fade-in">
     <label class="field"><span>Email o usuario</span><input name="user" required autocomplete="username" autocapitalize="none"></label>
@@ -510,20 +649,20 @@ function vAuth(){
   </form></main></div>`;
   return `<div class="shell auth"><main>
   <section class="auth-hero"><div class="orb"></div>
-    <div class="brand">Stilista<small>${esc(S.salon.name)}</small></div>
-    <h1 class="display" style="margin-top:34px">Tu pelo,<br><em>tu historia.</em></h1>
-    <p class="lead">Reservá en segundos, recibí la confirmación del salón y guardá cada tono, fórmula y esmalte que te hicieron.</p>
+    <div class="brand">${APP()}<small>${esc(S.salon.name)}</small></div>
+    <h1 class="display" style="margin-top:34px">${W('Tu pelo,<br><em>tu historia.</em>','Tu corte,<br><em>tu estilo.</em>')}</h1>
+    <p class="lead">${W('Reservá en segundos, recibí la confirmación del salón y guardá cada tono, fórmula y esmalte que te hicieron.','Reservá en segundos, recibí la confirmación de la barbería y guardá cómo te gusta el corte: máquina, degradé y barba.')}</p>
   </section>
-  <button class="shopcta" data-a="guestShop"><span class="bots">${shopPreview}</span><span><b>Tienda <em>online</em></b><small>Pedí tus productos y retirás en el salón</small></span><span class="go">${ic('arrow',18)}</span></button>
+  ${OFF()?`<div class="alert" style="margin:0 0 18px"><b>Reservas online no disponibles</b>Por el momento no se pueden sacar turnos ni hacer pedidos desde la app. Comunicate con ${LS()}${S.salon.phone?' al '+esc(S.salon.phone):''}.</div>`:`<button class="shopcta" data-a="guestShop"><span class="bots">${shopPreview}</span><span><b>Tienda <em>online</em></b><small>Pedí tus productos y retirás en ${LS()}</small></span><span class="go">${ic('arrow',18)}</span></button>`}
   <div class="seg"><button data-a="authMode" data-m="login" class="${reg?'':'on'}">Ingresar</button><button data-a="authMode" data-m="register" class="${reg?'on':''}">Crear cuenta</button></div>
   <form data-form="${reg?'register':'login'}" class="fade-in">
     ${reg?`<label class="field"><span>Nombre y apellido</span><input name="name" required autocomplete="name"></label>
-    <label class="field"><span>Celular</span><input name="phone" inputmode="tel" autocomplete="tel"></label>`:''}
+    <label class="field"><span>Celular (WhatsApp, para avisarte de tu turno)</span><input name="phone" inputmode="tel" autocomplete="tel" required placeholder="358 412-3456"></label>`:''}
     <label class="field"><span>${reg?'Email':'Email o usuario'}</span><input name="email" type="${reg?'email':'text'}" required autocomplete="${reg?'email':'username'}" autocapitalize="none"></label>
     <label class="field"><span>Contraseña</span><input name="pass" type="password" required ${reg?'minlength="4"':''} autocomplete="${reg?'new-password':'current-password'}"></label>
     <button class="btn accent" type="submit">${reg?'Crear mi cuenta':'Entrar'} ${ic('arrow',18)}</button>
   </form>
-  <div class="links"><button data-a="demo" data-who="u1">Probar como clienta demo</button><button class="acc" data-a="authMode" data-m="salon">${'Acceso salón →'}</button></div>
+  <div class="links"><button data-a="demo" data-who="u1">${W('Probar como clienta demo','Probar como cliente demo')}</button><button class="acc" data-a="authMode" data-m="salon">${W('Acceso salón →','Acceso barbería →')}</button></div>
   </main></div>`;
 }
 function vGuestShop(){
@@ -544,8 +683,8 @@ function dock(items,cur){
 }
 function vClient(u){
   const scr={home:cHome,book:cBook,turnos:cTurnos,shop:cShop,pass:cPass}[ui.tab]||cHome;
-  return `<div class="shell">${topbar(u,'Stilista · tu salón')}<main class="fade-in">${scr(u)}</main>${cartFab()}
-  ${dock([['home','Inicio','home'],['book','Reservar','plus'],['turnos','Turnos','cal'],['shop','Tienda','bag'],['pass','Pasaporte','drop']],ui.tab)}</div>`;
+  return `<div class="shell">${topbar(u,APP()+W(' · tu salón',' · tu barbería'))}<main class="fade-in">${scr(u)}</main>${cartFab()}
+  ${dock([['home','Inicio','home'],['book','Reservar','plus'],['turnos','Turnos','cal'],['shop','Tienda','bag'],['pass',W('Pasaporte','Historial'),W('drop','scissors')]],ui.tab)}</div>`;
 }
 const saludo=()=>{const h=new Date().getHours();return h<13?'Buen día':h<20?'Buenas tardes':'Buenas noches'};
 const myRecs=uid_=>S.records.filter(r=>r.userId===uid_).sort((a,b)=>b.date.localeCompare(a.date));
@@ -566,6 +705,20 @@ function ticket(a,withActions=true){
   <div class="tm">${ic('clock',14)} ${a.time} hs · con ${esc(st?st.name:'—')}</div>
   ${a.deposit&&ACTIVE.includes(a.status)?`<span class="paytag pt-${a.deposit.status}">${DST[a.deposit.status]} · ${money(a.deposit.amount)}</span>${withActions&&a.deposit.status==='pendiente'?`<div class="row mt"><button class="mini solid" data-a="openPay" data-k="appt" data-id="${a.id}">Pagar seña</button></div>`:''}`:''}${actions}</div></div>`;
 }
+function barberTiles(recs){
+  const lc=recs.find(r=>r.cut&&r.cut.style),lb=recs.find(r=>r.cut&&r.cut.beard);
+  return `<button class="tile" data-a="tab" data-t="pass"><span class="eyebrow">Tu último corte</span>
+      ${lc?`<span class="t">${esc(lc.cut.style)}</span><span class="small muted">${esc(lc.cut.machine||'')}</span>`:`<span class="small muted">Aún sin registros</span>`}</button>
+    <button class="tile" data-a="tab" data-t="pass"><span class="eyebrow">Tu barba</span>
+      ${lb?`<span class="t">${esc(lb.cut.beard)}</span><span class="small muted">${fdy(lb.date)}</span>`:`<span class="small muted">Aún sin registros</span>`}</button>`;
+}
+function cutHero(recs){
+  const lc=recs.find(r=>r.cut);if(!lc)return'';const c=lc.cut;
+  return `<div class="cuthero"><p class="eyebrow">Tu último corte · ${fdy(lc.date)}</p><div class="big">${esc(c.style||svc(lc.serviceId).name)}</div>
+  <div class="cutgrid"><div><span>Máquina</span><b>${esc(c.machine||'—')}</b></div><div><span>Degradé</span><b>${esc(c.fade||'—')}</b></div><div><span>Barba</span><b>${esc(c.beard||'—')}</b></div></div></div>`;
+}
+function cutTags(c){const t=[['Estilo',c.style],['Máquina',c.machine],['Degradé',c.fade],['Barba',c.beard]].filter(x=>x[1]);
+  return t.length?`<div class="cuttags">${t.map(([k,v])=>`<span><i>${k}:</i> ${esc(v)}</span>`).join('')}</div>`:''}
 function cHome(u){
   const next=upcoming(u.id),n=next[0],prop=next.find(a=>a.status==='propuesto');
   const recs=myRecs(u.id),lh=recs.find(r=>r.hair),ln=recs.find(r=>r.nails);
@@ -573,17 +726,18 @@ function cHome(u){
   const prods=[...S.products].sort((a,b)=>(ash&&b.id==='p1')-(ash&&a.id==='p1')).slice(0,5);
   return `<p class="eyebrow">${saludo()}</p>
   <h1 class="display">Hola,<br><em>${esc(first(u.name))}.</em></h1>
-  ${prop?`<div class="alert"><b>El salón te propone otro horario</b>${esc(svc(prop.serviceId).name)} · ${fd(prop.date)} a las ${prop.time} hs
+  ${prop?`<div class="alert"><b>${CS()} te propone otro horario</b>${esc(svc(prop.serviceId).name)} · ${fd(prop.date)} a las ${prop.time} hs
    <div class="row mt"><button class="btn sm" data-a="acceptProp" data-id="${prop.id}">Acepto</button><button class="btn sm o" data-a="resched" data-id="${prop.id}">Elegir otro</button></div></div>`:''}
+  ${n&&n.status==='confirmado'&&n.date===today()?`<div class="alert" style="background:var(--accent);color:${BAR()?'#141312':'#fff'}"><b>${minsTo(n)<=60?(minsTo(n)>0?'Tu turno es en '+minsTo(n)+' min':'Tu turno es ahora'):'Hoy tenés turno a las '+n.time+' hs'}</b>${esc(svc(n.serviceId).name)} con ${esc(staffBy(n.staffId)?.name||'')}. Si no llegás, avisá desde Turnos.</div>`:''}
   ${n?ticket(n):`<div class="ticket ghost"><div class="tb"><span class="eyebrow">Próximo turno</span><div class="tt">Todavía no reservaste.</div><div class="tm">Elegí servicio, profesional y horario en 3 toques.</div></div></div>`}
   <div class="bento">
-    <button class="tile big" data-a="tab" data-t="book"><span class="eyebrow">Nuevo turno</span><span class="t">Reservá<br><em>tu momento</em></span>${spinSvg}</button>
-    <button class="tile" data-a="tab" data-t="pass"><span class="eyebrow">Tu tono</span>
+    <button class="tile big" data-a="tab" data-t="book"><span class="eyebrow">Nuevo turno</span><span class="t">Reservá<br><em>${W('tu momento','tu turno')}</em></span>${spinSvg}</button>
+    ${BAR()?barberTiles(recs):`<button class="tile" data-a="tab" data-t="pass"><span class="eyebrow">Tu tono</span>
       ${lh?`<div style="display:flex;align-items:flex-end;gap:10px"><div class="strand mini-strand" style="--c:${lh.hair.hex}"></div><span class="t sm">${esc(lh.hair.code)}</span></div>`:`<span class="small muted">Aún sin registros de color</span>`}</button>
     <button class="tile" data-a="tab" data-t="pass"><span class="eyebrow">Tus uñas</span>
-      ${ln?`<div class="nailset">${[0,1,2].map(()=>`<i class="nail" style="--c:${ln.nails.hex}"></i>`).join('')}</div><span class="t sm">${esc(ln.nails.name)}</span>`:`<span class="small muted">Aún sin registros</span>`}</button>
+      ${ln?`<div class="nailset">${[0,1,2].map(()=>`<i class="nail" style="--c:${ln.nails.hex}"></i>`).join('')}</div><span class="t sm">${esc(ln.nails.name)}</span>`:`<span class="small muted">Aún sin registros</span>`}</button>`}
     <button class="tile wide" data-a="tab" data-t="shop"><span class="bots">${S.products.slice(0,4).map(bottle).join('')}</span>
-      <span style="flex:1;margin-left:14px"><span class="eyebrow">Tienda</span><span class="t sm" style="display:block;margin-top:4px">Hacé tu pedido y<br><em>retiralo en el salón</em></span></span><span class="go" style="width:40px;height:40px;border-radius:50%;background:var(--paper);color:var(--ink);display:grid;place-items:center">${ic('arrow',18)}</span></button>
+      <span style="flex:1;margin-left:14px"><span class="eyebrow">Tienda</span><span class="t sm" style="display:block;margin-top:4px">Hacé tu pedido y<br><em>retiralo en ${LS()}</em></span></span><span class="go" style="width:40px;height:40px;border-radius:50%;background:var(--paper);color:var(--ink);display:grid;place-items:center">${ic('arrow',18)}</span></button>
   </div>
   <h2 class="sec">Para tu rutina <button class="link" data-a="tab" data-t="shop">Ver tienda →</button></h2>
   <div class="hscroll">${prods.map(prodCard).join('')}</div>`;
@@ -619,7 +773,7 @@ function cBook(u){
       <div class="l"><span>Precio</span><b>${money(s.price)}</b></div>
       ${!b.resched&&depositFor(s)?`<div class="l"><span>Seña para reservar</span><b style="color:var(--accent)">${money(depositFor(s))} (${S.salon.pay.depositPct}%)</b></div>`:''}</div>
     ${b.resched?'':`<label class="field"><span>¿Algo que debamos saber?</span><textarea id="bnote" placeholder="Ej: quiero un tono más frío, tengo el pelo largo…"></textarea></label>`}
-    <p class="policy">El salón confirma tu ${b.resched?'cambio':'turno'} y te llega el aviso acá. Podés cambiar o cancelar hasta ${S.salon.cancelHours} hs antes.</p>
+    <p class="policy">${CS()} confirma tu ${b.resched?'cambio':'turno'} y te llega el aviso acá. Podés cambiar o cancelar hasta ${S.salon.cancelHours} hs antes.</p>
     <button class="btn accent" data-a="bConfirm">${b.resched?'Enviar cambio':'Solicitar turno'} ${ic('arrow',18)}</button>`;
   }
   return `<div class="bhead">${canBack?`<button class="iconbtn" data-a="bBack" aria-label="Volver">${ic('back',18)}</button>`:''}${b.resched?`<button class="back" data-a="bCancelResched">${ic('x',14)} Cancelar cambio</button>`:''}</div>
@@ -651,7 +805,7 @@ function prodCard(p){
 function cShop(){
   const cats=['Todo',...new Set(S.products.map(p=>p.cat))];
   const list=S.products.filter(p=>ui.shopCat==='Todo'||p.cat===ui.shopCat);
-  return `<p class="eyebrow">Retirás en el salón</p><h1 class="display">La<br><em>tienda.</em></h1>
+  return `<p class="eyebrow">Retirás en ${LS()}</p><h1 class="display">La<br><em>tienda.</em></h1>
   <div class="chips">${cats.map(c=>`<button class="fchip ${ui.shopCat===c?'on':''}" data-a="shopCat" data-c="${c}">${c}</button>`).join('')}</div>
   <div class="grid2">${list.map(prodCard).join('')}</div>`;
 }
@@ -666,14 +820,16 @@ function cartFab(){
 function hairChip(h){return `<div class="pchip"><div class="strand" style="--c:${h.hex};height:60px;border-radius:0"></div><div class="l">${esc(h.code)}<span>${esc(h.name)}</span></div></div>`}
 function nailChip(n){return `<div class="pchip"><div class="c" style="--c:${n.hex};background:linear-gradient(135deg,rgba(255,255,255,.35),transparent 40%),${n.hex}"></div><div class="l">${esc(n.name)}<span>${esc(n.brand||'Esmalte')}</span></div></div>`}
 function timeline(recs){
-  if(!recs.length)return `<div class="empty"><div class="big">Tu pasaporte está en blanco</div>Después de cada visita, el salón carga acá tu tono, fórmula y esmalte.</div>`;
+  if(!recs.length)return BAR()?`<div class="empty"><div class="big">Todavía no hay cortes</div>Después de cada visita, la barbería carga acá cómo te cortaron.</div>`:`<div class="empty"><div class="big">Tu pasaporte está en blanco</div>Después de cada visita, el salón carga acá tu tono, fórmula y esmalte.</div>`;
   return `<div class="tl">${recs.map(r=>`<div class="tl-item"><div class="tl-date">${fdy(r.date)} · ${esc(staffBy(r.staffId)?.name||'')}</div>
   <div class="tl-t">${esc(svc(r.serviceId).name)}</div>
+  ${r.cut?cutTags(r.cut):''}
   ${r.hair||r.nails?`<div class="chipsrow">${r.hair?hairChip(r.hair):''}${r.nails?nailChip(r.nails):''}</div>`:''}
   ${r.hair&&r.hair.formula?`<div class="fbox"><b>Fórmula</b> · ${esc(r.hair.formula)}</div>`:''}
   ${r.notes?`<p class="note">“${esc(r.notes)}”</p>`:''}</div>`).join('')}</div>`;
 }
 function passHero(recs){
+  if(BAR())return cutHero(recs);
   const lh=recs.find(r=>r.hair);if(!lh)return'';
   const hs=recs.filter(r=>r.hair).slice().reverse();
   return `<div class="tone-hero"><div class="strand" style="--c:${lh.hair.hex}"></div><div>
@@ -683,6 +839,9 @@ function passHero(recs){
 }
 function cPass(u){
   const all=myRecs(u.id);
+  if(BAR())return `<p class="eyebrow">${all.length} corte${all.length===1?'':'s'} registrado${all.length===1?'':'s'}</p><h1 class="display">Historial<br><em>de cortes.</em></h1>
+  <p class="lead">Cada corte que te hicieron: estilo, máquina, degradé y barba. Para pedir lo mismo sin tener que explicarlo.</p>
+  ${cutHero(all)}<div style="margin-top:22px">${timeline(all)}</div>`;
   const recs=all.filter(r=>ui.passF==='Todo'||(ui.passF==='Pelo'?r.hair||svc(r.serviceId).cat!=='Uñas':r.nails||svc(r.serviceId).cat==='Uñas'));
   return `<p class="eyebrow">${all.length} visita${all.length===1?'':'s'} registrada${all.length===1?'':'s'}</p><h1 class="display">Pasaporte<br><em>de color.</em></h1>
   <p class="lead">Cada tono, fórmula y esmalte que te hicieron. Para repetirlo igual o animarte a algo nuevo.</p>
@@ -692,9 +851,67 @@ function cPass(u){
 }
 
 /* ============ panel del salón ============ */
+function licPayBox(){
+  const P=S.license.pay||{};const any=P.alias||P.cbu||P.mpLink;
+  if(!any)return `<div class="paybox"><p class="small">Pedile los datos de pago a tu proveedor del sistema.</p></div>`;
+  return `<div class="paybox"><p class="eyebrow">Transferí ${money(S.license.amount)} a</p>${pl('Alias',P.alias)}${pl('CBU/CVU',P.cbu)}${pl('Titular',P.holder)}
+  ${P.mpLink?`<a class="btn accent" style="margin-top:8px" href="${esc(P.mpLink)}" target="_blank" rel="noopener">Pagar con Mercado Pago</a>`:''}${P.note?`<p class="paynote">${esc(P.note)}</p>`:''}</div>`;
+}
+function vLocked(u){
+  const L=S.license;
+  return `<div class="shell">${topbar(u,'Servicio suspendido')}<main class="fade-in">
+  <p class="eyebrow">${APP()}</p><h1 class="display">Servicio<br><em>suspendido.</em></h1>
+  <p class="lead">El sistema de ${esc(S.salon.name)} está suspendido por falta de pago. Mientras tanto, tus clientes no pueden sacar turnos ni comprar en la tienda. Tus datos están guardados.</p>
+  <div class="lockcard"><p class="eyebrow">Abono pendiente</p><div class="display" style="font-size:48px;margin:6px 0 10px">${money(L.amount)}</div>${licPayBox()}
+  ${L.informed?`<p class="small">${ic('check',14)} Informaste el pago ${rel(L.informed)}. Se reactiva cuando se confirme.</p>`:`<button class="btn accent" data-a="licInform">Ya pagué</button>`}</div>
+  <button class="btn line mt" data-a="logout" style="margin-top:20px">Cerrar sesión</button></main></div>`;
+}
+function vClientOff(u){
+  return `<div class="shell">${topbar(u,APP())}<main class="fade-in">
+  <p class="eyebrow">${esc(S.salon.name)}</p><h1 class="display">Volvemos<br><em>pronto.</em></h1>
+  <p class="lead">Por el momento las reservas y la tienda online no están disponibles. Para sacar turno comunicate con ${LS()}${S.salon.phone?' al '+esc(S.salon.phone):''}.</p>
+  <button class="btn line mt" data-a="logout" style="margin-top:24px">Cerrar sesión</button></main></div>`;
+}
+function vCreator(u){
+  const L=S.license,st=licState(),adm=S.users.find(x=>x.role==='admin')||{};
+  const nCl=S.users.filter(x=>x.role==='client').length,nAp=S.appts.filter(a=>(a.created||0)>Date.now()-30*864e5).length;
+  const P=L.pay||{};
+  const btns=st==='suspendida'?`<button class="btn accent" data-a="licPaid">${ic('check',16)} Registrar pago y reactivar</button>`
+    :`<button class="btn accent" data-a="licPaid">${ic('check',16)} Registrar pago</button>${st==='activa'?`<button class="btn line" data-a="licWarn">Avisar que pague</button>`:`<button class="btn line" data-a="licWarn">Reenviar aviso</button>`}`;
+  return `<div class="shell">${topbar(u,'Usuario creador')}<main class="fade-in">
+  <p class="eyebrow">${APP()} · panel del creador</p><h1 class="display">Tus<br><em>clientes.</em></h1>
+  <p class="small muted" style="margin-top:10px">En esta versión ves el comercio de esta instalación. Con la base de datos online vas a ver todos tus clientes en esta pantalla.</p>
+  <div class="req" style="margin-top:18px">
+   <div class="who"><span class="av">${initials(S.salon.name)}</span><div style="flex:1"><b>${esc(S.salon.name)}</b><div class="small muted">${W('Salón','Barbería')} · ${esc(adm.email||'')}${S.salon.phone?' · '+esc(S.salon.phone):''}</div></div><span class="pill lic-${st}">${LIC[st]}</span></div>
+   <div class="kpis"><div class="kpi"><b style="font-size:24px;line-height:1.3">${money(L.amount)}</b><span>abono</span></div><div class="kpi"><b style="font-size:24px;line-height:1.3">${fd(L.due)}</b><span>${today()>L.due?'vencido':'vence'}</span></div><div class="kpi"><b>${nCl}</b><span>clientes · ${nAp} turnos/30d</span></div></div>
+   ${L.informed?`<p class="paytag pt-informado">Informó un pago ${rel(L.informed)} · verificalo</p>`:''}
+   <div class="row mt">${btns}</div>
+   ${st!=='suspendida'?`<button class="btn line mt" data-a="licAskSuspend" style="color:#c0392b;border-color:#c0392b">Suspender por falta de pago</button>`:`<p class="small muted mt">Suspendido: ${W('el salón','la barbería')} ve la pantalla de pago y sus clientes no pueden reservar.</p>`}
+  </div>
+  <p class="cat">Abono y tus datos de cobro</p>
+  <form data-form="licSettings">
+   <div class="grid2f"><label class="field"><span>Abono mensual</span><input name="amount" type="number" min="0" step="100" value="${L.amount}"></label><label class="field"><span>Próximo vencimiento</span><input name="due" type="date" value="${L.due}"></label></div>
+   <div class="grid2f"><label class="field"><span>Tu alias</span><input name="alias" value="${esc(P.alias||'')}" autocapitalize="none"></label><label class="field"><span>Titular</span><input name="holder" value="${esc(P.holder||'')}"></label></div>
+   <label class="field"><span>CBU / CVU</span><input name="cbu" value="${esc(P.cbu||'')}" inputmode="numeric" maxlength="22"></label>
+   <label class="field"><span>Link de pago Mercado Pago (opcional)</span><input name="mpLink" type="url" value="${esc(P.mpLink||'')}"></label>
+   <label class="field"><span>Mensaje (opcional)</span><input name="note" value="${esc(P.note||'')}" placeholder="Ej: mandá el comprobante por WhatsApp"></label>
+   <label class="field"><span>Nueva contraseña del creador</span><input name="cpass" type="password" minlength="4" placeholder="Dejar vacío = igual" autocomplete="new-password"></label>
+   <button class="btn" type="submit">Guardar</button>
+  </form>
+  ${(L.history||[]).length?`<p class="cat">Pagos registrados</p>${L.history.map(h=>`<div class="item"><div class="grow"><b>${money(h.amount)}</b><small>Registrado ${fdy(iso(new Date(h.ts)))} · cubría vencimiento ${fd(h.due)}</small></div></div>`).join('')}`:''}
+  <button class="btn line mt" data-a="logout" style="margin-top:22px">Cerrar sesión</button></main></div>`;
+}
+function licMsg(kind){const L=S.license,n=S.salon.name;
+  return kind==='aviso'?`Hola ${n}! Te recordamos que el abono de ${APP()} (${money(L.amount)}) vence${today()>L.due?'ió':''} el ${fd(L.due)}. Podés pagarlo desde el aviso en el panel. Si ya lo pagaste, avisame. ¡Gracias!`
+   :kind==='suspendida'?`Hola ${n}. El servicio de ${APP()} quedó suspendido por falta de pago (${money(L.amount)}). Apenas se acredite el pago lo reactivo. Cualquier duda escribime.`
+   :`Hola ${n}! Recibí tu pago de ${APP()}, ¡gracias! El servicio sigue activo. Próximo vencimiento: ${fd(L.due)}.`}
+function offerLicWa(kind){if(S.salon.phone)ui.modal={type:'waRaw',phone:S.salon.phone,text:licMsg(kind),title:'Avisar por <em>WhatsApp</em>',who:S.salon.name};else ui.modal=null}
 function vAdmin(u){
   const scr={agenda:aAgenda,clientes:aClients,shop:aShop,ajustes:aSettings}[ui.atab]||aAgenda;
-  return `<div class="shell">${topbar(u,'Panel del salón')}<main class="fade-in">${scr()}</main>
+  const ls=licState(),L=S.license;
+  const ban=ls==='aviso'?`<div class="alert" style="background:#f5e3c4;color:#5c3a08;margin:0 0 16px"><b>${today()>L.due?'Tu suscripción está vencida':'Tenés un pago pendiente'}</b>Abono de ${money(L.amount)} · vence${today()>L.due?'ió':''} el ${fd(L.due)}. Pagalo para evitar la suspensión del servicio.
+    <div class="row mt"><button class="btn sm" data-a="openLicPay" style="background:#5c3a08;color:#fff">Ver cómo pagar</button>${L.informed?'<span class="small">Pago informado ✓</span>':''}</div></div>`:'';
+  return `<div class="shell">${topbar(u,W('Panel del salón','Panel de la barbería'))}<main class="fade-in">${ban}${scr()}</main>
   ${dock([['agenda','Agenda','cal'],['clientes','Clientes','users'],['shop','Tienda','bag'],['ajustes','Ajustes','cog']],ui.atab)}</div>`;
 }
 function aAgenda(){
@@ -708,13 +925,23 @@ function aAgenda(){
   return `<p class="eyebrow">${DAYSL[d.getDay()]}</p><h1 class="display">${d.getDate()} de<br><em>${MONL[d.getMonth()]}.</em></h1>
   <div class="kpis"><div class="kpi"><b>${todayN}</b><span>turnos hoy</span></div><div class="kpi"><b style="color:var(--accent)">${pend.length}</b><span>por confirmar</span></div><div class="kpi"><b>${newOrders}</b><span>pedidos nuevos</span></div></div>
   ${pend.length?`<h2 class="sec"><span>Solicitudes <span class="count">${pend.length}</span></span></h2>${pend.map(reqCard).join('')}`:''}
+  ${remindersBox()}
   <h2 class="sec">Agenda</h2>
   <div class="ribbon">${days.map(x=>{const dd=pISO(x);return `<button class="day ${x===ui.aday?'on':''} ${isOpen(x)?'':'off'}" data-a="aDay" data-d="${x}">${DAYS[dd.getDay()]}<b>${dd.getDate()}</b>${hasAppt(x)?'<span class="c"></span>':''}</button>`}).join('')}</div>
   <div style="margin-top:10px">${dayList.length?dayList.map(a=>{const st=staffBy(a.staffId),cl=userBy(a.userId),s=svc(a.serviceId);
     return `<div class="item ${a.status==='realizado'?'done':''}"><span class="bar" style="--c:${st?.c||'#999'}"></span><div class="timebox">${a.time}</div>
     <div class="grow"><b>${esc(cl.name)}</b><small>${esc(s.name)} · ${esc(st?.name||'')}${a.status==='propuesto'?' · esperando respuesta':''}${a.deposit?' · '+DST[a.deposit.status]:''}</small></div>
-    ${a.status==='confirmado'?`<div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-a="done" data-id="${a.id}" title="Marcar realizado">${ic('check',16)}</button><button class="btn sm line" data-a="askCancel" data-id="${a.id}" title="Cancelar">${ic('x',16)}</button></div>`:`<span class="pill st-${a.status}">${a.status==='realizado'?'Hecho':'Propuesto'}</span>`}</div>`}).join('')
+    ${a.status==='confirmado'?`<div class="row" style="flex-wrap:nowrap">${userBy(a.userId).phone?`<a class="btn sm line" href="${waText(userBy(a.userId).phone,apptMsg('recordatorio',a))}" target="_blank" rel="noopener" data-rem="${a.id}" data-k="recordatorio" title="Recordatorio por WhatsApp" aria-label="Recordatorio por WhatsApp" style="${a.reminded?'opacity:.45':''}">${ic('wa',16)}</a>`:''}<button class="btn sm" data-a="done" data-id="${a.id}" title="Marcar realizado">${ic('check',16)}</button><button class="btn sm line" data-a="askCancel" data-id="${a.id}" title="Cancelar">${ic('x',16)}</button></div>`:`<span class="pill st-${a.status}">${a.status==='realizado'?'Hecho':'Propuesto'}</span>`}</div>`}).join('')
     :`<div class="empty"><div class="big">${isOpen(ui.aday)?'Día libre':'Cerrado'}</div>${isOpen(ui.aday)?'No hay turnos confirmados.':''}</div>`}</div>`;
+}
+function remindersBox(){
+  const list=S.appts.filter(a=>a.status==='confirmado'&&a.date===today()&&!a.reminded&&minsTo(a)>-15&&minsTo(a)<=180).sort((a,b)=>dt(a)-dt(b));
+  if(!list.length)return'';
+  return `<h2 class="sec"><span>Recordatorios <span class="count">${list.length}</span></span></h2>
+  <p class="small muted" style="margin:-4px 0 10px">Turnos de las próximas 3 horas. Lo ideal: avisar unos 30 minutos antes.</p>
+  ${list.map(a=>{const c=userBy(a.userId),mm=minsTo(a);return `<div class="item" style="${mm<=30&&mm>0?'border-color:var(--accent)':''}"><div class="timebox">${a.time}</div>
+   <div class="grow"><b>${esc(c.name)}</b><small>${esc(svc(a.serviceId).name)} · ${mm>0?'en '+mm+' min':'ahora'}</small></div>
+   ${c.phone?`<a class="btn sm ${mm<=30?'accent':'line'}" href="${waText(c.phone,apptMsg('recordatorio',a))}" target="_blank" rel="noopener" data-rem="${a.id}" data-k="recordatorio">${ic('wa',16)} Recordar</a>`:'<small class="muted">sin celular</small>'}</div>`}).join('')}`;
 }
 function reqCard(a){
   const cl=userBy(a.userId),s=svc(a.serviceId),st=staffBy(a.staffId);
@@ -739,12 +966,12 @@ function aClients(){
     const spent=S.orders.filter(o=>o.userId===u.id).reduce((t,o)=>t+o.total,0);
     const up=upcoming(u.id);
     return `<button class="back" data-a="closeClient">${ic('back',14)} Clientes</button>
-    <p class="eyebrow">Ficha de clienta</p><h1 class="display">${esc(first(u.name))}<br><em>${esc(u.name.split(' ').slice(1).join(' ')||'')}</em></h1>
+    <p class="eyebrow">${W('Ficha de clienta','Ficha de cliente')}</p><h1 class="display">${esc(first(u.name))}<br><em>${esc(u.name.split(' ').slice(1).join(' ')||'')}</em></h1>
     <p class="small muted" style="margin-top:10px">${esc(u.email)}${u.phone?' · '+esc(u.phone):''}</p>
     <div class="kpis"><div class="kpi"><b>${recs.length}</b><span>visitas</span></div><div class="kpi"><b>${up.length}</b><span>turnos próximos</span></div><div class="kpi"><b style="font-size:22px;line-height:1.45">${money(spent)}</b><span>en tienda</span></div></div>
     <button class="btn accent mt" data-a="newRecord" data-id="${u.id}">${ic('plus',18)} Registrar servicio</button>
     ${up.length?`<h2 class="sec">Próximos turnos</h2>${up.map(a=>ticket(a,false)).join('')}`:''}
-    <h2 class="sec">Pasaporte de color</h2>${passHero(recs)}<div style="margin-top:14px">${timeline(recs)}</div>`;
+    <h2 class="sec">${W('Pasaporte de color','Historial de cortes')}</h2>${passHero(recs)}<div style="margin-top:14px">${timeline(recs)}</div>`;
   }
   return `<p class="eyebrow">${S.users.filter(u=>u.role==='client').length} registradas</p><h1 class="display">Tus<br><em>clientes.</em></h1>
   <input class="search" data-in="clientQ" placeholder="Buscar por nombre, email o celular" value="${esc(ui.clientQ)}">
@@ -767,10 +994,10 @@ function aShop(){
 function paySettings(){
   const p=S.salon.pay,ck=(n,l,sub)=>`<label class="check"><input type="checkbox" name="${n}" ${p[n]?'checked':''}><span>${l}${sub?`<small>${sub}</small>`:''}</span></label>`;
   return `<p class="eyebrow">Cobros</p><h2 class="sec" style="margin-top:6px">Datos para <em style="color:var(--accent)">el pago</em></h2>
-  <p class="small muted" style="margin-bottom:14px">Es lo que ven tus clientas al pagar un pedido de la tienda o la seña de un turno.</p>
+  <p class="small muted" style="margin-bottom:14px">Es lo que ven ${W('tus clientas','tus clientes')} al pagar un pedido de la tienda o la seña de un turno.</p>
   <form data-form="paySettings">
     <p class="cat" style="margin-top:0">Medios que aceptás</p>
-    ${ck('cash','Efectivo en el salón')}${ck('debit','Débito / crédito en el salón','Con posnet al retirar')}${ck('transfer','Transferencia','Alias o CBU/CVU')}${ck('mp','Mercado Pago','Link de pago o alias')}
+    ${ck('cash','Efectivo en el local')}${ck('debit','Débito / crédito en el local','Con posnet al retirar')}${ck('transfer','Transferencia','Alias o CBU/CVU')}${ck('mp','Mercado Pago','Link de pago o alias')}
     <p class="cat">Cuenta para transferencias</p>
     <div class="grid2f"><label class="field"><span>Alias</span><input name="alias" value="${esc(p.alias)}" autocapitalize="none"></label><label class="field"><span>Banco / billetera</span><input name="bank" value="${esc(p.bank)}"></label></div>
     <label class="field"><span>CBU / CVU</span><input name="cbu" value="${esc(p.cbu)}" inputmode="numeric" maxlength="22"></label>
@@ -779,15 +1006,22 @@ function paySettings(){
     <p class="cat">Seña para reservar turnos</p>
     ${ck('depositOn','Pedir seña al reservar','Se paga por transferencia o Mercado Pago')}
     <label class="field"><span>Porcentaje de seña</span><input name="depositPct" type="number" min="0" max="100" value="${p.depositPct}"></label>
-    <label class="field"><span>Mensaje para las clientas</span><textarea name="note" placeholder="Ej: enviá el comprobante por WhatsApp">${esc(p.note)}</textarea></label>
+    <label class="field"><span>${W('Mensaje para las clientas','Mensaje para los clientes')}</span><textarea name="note" placeholder="Ej: enviá el comprobante por WhatsApp">${esc(p.note)}</textarea></label>
     <button class="btn accent" type="submit">Guardar datos de pago</button>
   </form>`;
 }
 function aSettings(){
   const s=S.salon;
-  return `<p class="eyebrow">Configuración</p><h1 class="display">Tu<br><em>salón.</em></h1>
+  return `<p class="eyebrow">Configuración</p><h1 class="display">Tu<br><em>${W('salón','barbería')}.</em></h1>
+  <p class="cat">Estilo de la app</p>
+  <div class="stylepick">
+    <button class="stylecard ${BAR()?'':'on'}" data-a="setStyle" data-v="salon"><span class="sw"><i style="background:#F4EEE6;border:1px solid #ddd2c4"></i><i style="background:#8C2F39"></i><i style="background:#E3B5A4"></i></span><b>Salón</b><small>Peluquería, color y uñas</small></button>
+    <button class="stylecard ${BAR()?'on':''}" data-a="setStyle" data-v="barber"><span class="sw"><i style="background:#141312;border:1px solid #444"></i><i style="background:#C9973F"></i><i style="background:#EEE7DC"></i></span><b>Barbería</b><small>Corte, degradé y barba</small></button>
+  </div>
+  <button class="btn line sm" data-a="askSample" data-v="${BAR()?'barber':'salon'}">Cargar datos de ejemplo de ${W('salón','barbería')}</button>
+  <div class="divider"></div>
   <form data-form="settings" style="margin-top:20px">
-    <label class="field"><span>Nombre del salón</span><input name="name" value="${esc(s.name)}" required></label>
+    <label class="field"><span>${W('Nombre del salón','Nombre de la barbería')}</span><input name="name" value="${esc(s.name)}" required></label>
     <div class="grid2f"><label class="field"><span>Abre</span><input type="time" name="open" value="${s.open}" step="1800"></label><label class="field"><span>Cierra</span><input type="time" name="close" value="${s.close}" step="1800"></label></div>
     <div class="grid2f"><label class="field"><span>Teléfono</span><input name="phone" value="${esc(s.phone||'')}"></label><label class="field"><span>Cambios hasta (hs antes)</span><input type="number" name="cancelHours" min="0" max="72" value="${s.cancelHours}"></label></div>
     <label class="field"><span>Dirección</span><input name="address" value="${esc(s.address||'')}"></label>
@@ -795,7 +1029,10 @@ function aSettings(){
     <label class="field"><span>Email de acceso</span><input name="aemail" type="email" value="${esc((S.users.find(u=>u.role==='admin')||{}).email||'')}" required autocapitalize="none"></label>
     <div class="grid2f"><label class="field"><span>Usuario</span><input name="ausername" value="${esc((S.users.find(u=>u.role==='admin')||{}).username||'')}" required autocapitalize="none"></label><label class="field"><span>Nueva contraseña</span><input name="apass" type="password" minlength="4" placeholder="Dejar vacío = igual" autocomplete="new-password"></label></div>
     <p class="cat">Servicios y precios</p>
-    ${S.services.map(x=>`<div class="svcedit"><input name="sname_${x.id}" value="${esc(x.name)}"><input name="sprice_${x.id}" type="number" min="0" step="100" value="${x.price}"></div>`).join('')}
+    <p class="small muted" style="margin:-4px 0 10px">Son los que ${W('tus clientas','tus clientes')} eligen al pedir turno. Agrupados por categoría.</p>
+    <div class="svchead"><span>Servicio</span><span>Precio</span><span>Minutos</span><span></span></div>
+    ${[...new Set(S.services.map(x=>x.cat))].map(c=>`<p class="small" style="font-weight:800;margin:10px 0 6px">${esc(c)}</p>`+S.services.filter(x=>x.cat===c).map(x=>`<div class="svcedit"><input name="sname_${x.id}" value="${esc(x.name)}" aria-label="Nombre"><input name="sprice_${x.id}" type="number" min="0" step="100" value="${x.price}" aria-label="Precio"><select name="sdur_${x.id}" aria-label="Duración">${[15,20,30,40,45,60,75,90,120,150,180,240].map(m=>`<option value="${m}" ${m===x.dur?'selected':''}>${m}</option>`).join('')}</select><button type="button" class="del" data-a="delSvc" data-id="${x.id}" aria-label="Quitar ${esc(x.name)}">${ic('x',15)}</button></div>`).join('')).join('')}
+    <button type="button" class="btn line sm mt" data-a="newSvc">${ic('plus',16)} Agregar servicio</button>
     <button class="btn accent mt" type="submit">Guardar cambios</button>
   </form>
   <div class="divider"></div>
@@ -819,7 +1056,9 @@ function vModal(u){
     const orders=S.orders.filter(o=>o.userId===u.id).sort((a,b)=>b.ts-a.ts);
     return `<div style="display:flex;gap:14px;align-items:center"><span class="av" style="width:56px;height:56px;font-size:17px">${initials(u.name)}</span><div><h3 style="margin:0">${esc(u.name)}</h3><p class="small muted">${esc(u.email)}${u.phone?' · '+esc(u.phone):''}</p></div></div>
     ${u.role==='client'?`<p class="cat">Mis pedidos</p>${orders.length?orders.map(o=>`<div class="item"><div class="grow"><b>${money(o.total)}</b><small>${o.items.map(i=>i.qty+'× '+esc(prodBy(i.pid)?.name||'')).join(', ')}</small></div><span class="pill st-${o.status}">${OST[o.status]}</span></div>`).join(''):`<p class="small muted">Todavía no compraste en la tienda.</p>`}
-    <p class="cat">Tu salón</p><p class="small">${esc(S.salon.name)} · ${esc(S.salon.address||'')}<br>Tel. ${esc(S.salon.phone||'')} · ${S.salon.open} a ${S.salon.close} hs</p>`:''}
+    <p class="cat">${W('Tu salón','Tu barbería')}</p><p class="small">${esc(S.salon.name)} · ${esc(S.salon.address||'')}<br>Tel. ${esc(S.salon.phone||'')} · ${S.salon.open} a ${S.salon.close} hs</p>`:''}
+    <p class="cat">Avisos en este celular</p>
+    ${(()=>{const st=notifState();return st==='granted'?`<p class="small">${ic('check',14)} Activados: te avisamos cuando ${u.role==='admin'?'llegue una solicitud':'confirmen o cambien tu turno, y 30 minutos antes de cada turno'} mientras tengas la app abierta.</p>`:st==='denied'?`<p class="small muted">Bloqueaste los avisos en este navegador. Podés habilitarlos desde la configuración del navegador.</p>`:st==='unsupported'?`<p class="small muted">Este navegador no permite avisos. Igual los vas a ver en la campanita.</p>`:`<button class="btn line" data-a="askNotif">${ic('bellr',18)} Activar avisos</button>`})()}
     <button class="btn mt" data-a="logout" style="margin-top:22px">Cerrar sesión</button>`;
   }
   if(m.type==='cart'){
@@ -842,10 +1081,49 @@ function vModal(u){
     </form>
     <div class="links"><button data-a="openCart">← Volver a la bolsa</button><button class="acc" data-a="guestExit">Tengo cuenta</button></div>`;
   }
+  if(m.type==='wa'){
+    const a=getA(m.id),c=userBy(a.userId),href=waText(c.phone,m.text);
+    return `<h3>Avisar por <em>WhatsApp</em></h3><p class="small muted">${esc(c.name)} ya tiene el aviso en la app. Mandáselo también por WhatsApp con un toque:</p>
+    <div class="paybox" style="white-space:pre-wrap;font-size:14px">${esc(m.text)}</div>
+    <a class="btn accent" href="${href}" target="_blank" rel="noopener" data-rem="${a.id}" data-k="${m.kind}">${ic('wa',18)} Enviar a ${esc(c.phone)}</a>
+    <button class="btn line mt" data-a="closeModal">Listo, no hace falta</button>`;
+  }
+  if(m.type==='svc'){
+    const cats=[...new Set(S.services.map(x=>x.cat))];
+    return `<h3>Nuevo <em>servicio</em></h3><p class="small muted">Aparece al instante cuando ${W('tus clientas piden','tus clientes piden')} turno.</p>
+    <form data-form="newSvc" style="margin-top:14px">
+      <label class="field"><span>Nombre</span><input name="name" required placeholder="${W('Ej: Tintura raíz','Ej: Corte + barba')}"></label>
+      <label class="field"><span>Categoría</span><input name="cat" list="svccats" required value="${esc(cats[0]||'')}"><datalist id="svccats">${cats.map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist></label>
+      <div class="grid2f"><label class="field"><span>Precio</span><input name="price" type="number" min="0" step="100" required></label>
+      <label class="field"><span>Duración (min)</span><select name="dur">${[15,20,30,40,45,60,75,90,120,150,180,240].map(m=>`<option ${m===30?'selected':''}>${m}</option>`).join('')}</select></label></div>
+      <button class="btn accent" type="submit">Agregar</button></form>`;
+  }
+  if(m.type==='waRaw'){
+    return `<h3>${m.title}</h3><p class="small muted">${esc(m.who)} ya tiene el aviso en su panel. Mandáselo también por WhatsApp:</p>
+    <div class="paybox" style="white-space:pre-wrap;font-size:14px">${esc(m.text)}</div>
+    <a class="btn accent" href="${waText(m.phone,m.text)}" target="_blank" rel="noopener" data-rem="x">${ic('wa',18)} Enviar a ${esc(m.phone)}</a>
+    <button class="btn line mt" data-a="closeModal">Listo</button>`;
+  }
+  if(m.type==='licPay'){
+    const L=S.license;
+    return `<h3>Pagar el <em>abono</em></h3><p class="small muted">${APP()} · vence${today()>L.due?'ió':''} el ${fd(L.due)}</p>${licPayBox()}
+    ${L.informed?`<p class="small">${ic('check',14)} Ya informaste el pago ${rel(L.informed)}.</p>`:`<button class="btn accent" data-a="licInform">Ya pagué</button>`}
+    <button class="btn line mt" data-a="closeModal">Cerrar</button>`;
+  }
+  if(m.type==='licSuspend'){
+    return `<h3>¿Suspender <em>el servicio?</em></h3><p class="small muted" style="margin-top:6px">${esc(S.salon.name)} va a ver una pantalla para pagar y sus clientes no van a poder sacar turnos ni comprar hasta que lo reactives. No se borra ningún dato.</p>
+    <div class="row mt" style="margin-top:18px"><button class="btn line" data-a="closeModal">Cancelar</button><button class="btn" data-a="licSuspend" style="background:#c0392b;color:#fff">Suspender</button></div>`;
+  }
+  if(m.type==='sample'){
+    const b=m.v==='barber';
+    return `<h3>Cargar ejemplo de <em>${b?'barbería':'salón'}</em></h3>
+    <p class="small muted" style="margin-top:6px">Reemplaza servicios, equipo, productos, ${b?'clientes':'clientas'}, turnos, pedidos e historial por datos de ejemplo de ${b?'barbería':'peluquería y uñas'}. Se mantienen el acceso del salón y los datos de pago.</p>
+    <div class="row mt" style="margin-top:18px"><button class="btn line" data-a="closeModal">Cancelar</button><button class="btn accent" data-a="doSample">Cargar ejemplo</button></div>`;
+  }
   if(m.type==='payInfo'){
     if(m.k==='appt'){
       const a=getA(m.id),s=svc(a.serviceId),list=onlineMethods();
-      return `<h3>Pagá la <em>seña</em></h3><p class="small muted">${esc(s.name)} · ${fd(a.date)} ${a.time} hs. Con la seña el salón confirma tu lugar.</p>
+      return `<h3>Pagá la <em>seña</em></h3><p class="small muted">${esc(s.name)} · ${fd(a.date)} ${a.time} hs. Con la seña ${LS()} confirma tu lugar.</p>
       ${list.length>1?`<div style="margin-top:12px">${methodPicker(list)}</div>`:(curMethod(list),'')}
       ${payBox(ui.payMethod,a.deposit.amount)}
       <button class="btn accent" data-a="informPaid" data-k="appt" data-id="${a.id}">Ya pagué la seña</button>
@@ -870,7 +1148,7 @@ function vModal(u){
   if(m.type==='cancel'){
     const a=getA(m.id),s=svc(a.serviceId),adm=u.role==='admin';
     return `<h3>¿Cancelar <em>el turno?</em></h3><p class="small muted">${esc(s.name)} · ${fd(a.date)} ${a.time} hs${adm?' · '+esc(userBy(a.userId).name):''}</p>
-    <label class="field mt"><span>${adm?'Mensaje para la clienta':'Motivo (opcional)'}</span><textarea id="creason" placeholder="${adm?'Ej: tuvimos un imprevisto, escribinos para reprogramar':'Ej: me surgió algo'}"></textarea></label>
+    <label class="field mt"><span>${adm?W('Mensaje para la clienta','Mensaje para el cliente'):'Motivo (opcional)'}</span><textarea id="creason" placeholder="${adm?'Ej: tuvimos un imprevisto, escribinos para reprogramar':'Ej: me surgió algo'}"></textarea></label>
     <div class="row"><button class="btn line" data-a="closeModal">Volver</button><button class="btn accent" data-a="doCancel" data-id="${a.id}">Sí, cancelar</button></div>`;
   }
   if(m.type==='propose'){
@@ -885,6 +1163,22 @@ function vModal(u){
   if(m.type==='record'){
     const cl=userBy(m.userId),a=m.apptId?getA(m.apptId):null;
     const sId=a?a.serviceId:S.services[0].id,tId=a?a.staffId:S.staff[0].id;
+    if(BAR()){
+      const prev=myRecs(m.userId).find(r=>r.cut);const pc=prev?prev.cut:{};
+      const opts=(list,f,cur)=>`<div class="tpick">${list.map(v=>`<button type="button" class="tp ${v===cur?'on':''}" data-a="pickOpt" data-f="${f}" data-v="${esc(v)}" style="padding:8px 13px">${esc(v)}</button>`).join('')}</div>`;
+      return `<h3>Registrar <em>corte</em></h3><p class="small muted">${esc(cl.name)} · se suma a su historial${prev?' · precargado con su último corte':''}</p>
+      <form data-form="record" style="margin-top:14px"><input type="hidden" name="userId" value="${m.userId}"><input type="hidden" name="apptId" value="${m.apptId||''}">
+      <div class="grid2f"><label class="field"><span>Fecha</span><input type="date" name="date" value="${a?a.date:today()}" required></label>
+      <label class="field"><span>Barbero</span><select name="staffId">${S.staff.map(t=>`<option value="${t.id}" ${t.id===tId?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label></div>
+      <label class="field"><span>Servicio</span><select name="serviceId">${S.services.map(x=>`<option value="${x.id}" ${x.id===sId?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+      <p class="cat">Estilo de corte</p>${opts(CUTS,'cstyle',pc.style)}
+      <label class="field"><span>Estilo (o escribilo)</span><input name="cstyle" value="${esc(pc.style||'')}" placeholder="Fade medio"></label>
+      <label class="field"><span>Máquina / números</span><input name="cmachine" value="${esc(pc.machine||'')}" placeholder="Costados 1 · arriba tijera 3 cm"></label>
+      <p class="cat">Degradé</p>${opts(FADES,'cfade',pc.fade)}<input type="hidden" name="cfade" value="${esc(pc.fade||'')}">
+      <p class="cat">Barba</p>${opts(BEARDS,'cbeard',pc.beard)}<input type="hidden" name="cbeard" value="${esc(pc.beard||'')}">
+      <label class="field mt"><span>Notas para la próxima</span><textarea name="notes" placeholder="Raya, nuca, productos que usa, remolinos…"></textarea></label>
+      <button class="btn accent" type="submit">${ic('check',18)} Guardar en el historial</button></form>`;
+    }
     return `<h3>Registrar <em>servicio</em></h3><p class="small muted">${esc(cl.name)} · se suma a su pasaporte de color</p>
     <form data-form="record" style="margin-top:14px"><input type="hidden" name="userId" value="${m.userId}"><input type="hidden" name="apptId" value="${m.apptId||''}">
     <div class="grid2f"><label class="field"><span>Fecha</span><input type="date" name="date" value="${a?a.date:today()}" required></label>
@@ -903,7 +1197,7 @@ function vModal(u){
   if(m.type==='product'){
     return `<h3>Nuevo <em>producto</em></h3><form data-form="product" style="margin-top:14px">
     <label class="field"><span>Nombre</span><input name="name" required></label>
-    <div class="grid2f"><label class="field"><span>Marca</span><input name="brand" required></label><label class="field"><span>Categoría</span><select name="cat">${['Shampoo','Tratamiento','Styling','Uñas','Otros'].map(c=>`<option>${c}</option>`).join('')}</select></label></div>
+    <div class="grid2f"><label class="field"><span>Marca</span><input name="brand" required></label><label class="field"><span>Categoría</span><select name="cat">${(BAR()?['Peinado','Barba','Shampoo','Otros']:['Shampoo','Tratamiento','Styling','Uñas','Otros']).map(c=>`<option>${c}</option>`).join('')}</select></label></div>
     <div class="grid2f"><label class="field"><span>Precio</span><input name="price" type="number" min="0" required></label><label class="field"><span>Stock</span><input name="stock" type="number" min="0" value="1" required></label></div>
     <div class="grid2f"><label class="field"><span>Envase</span><select name="shape"><option value="bottle">Botella</option><option value="jar">Pote</option><option value="spray">Spray</option><option value="polish">Frasco chico</option></select></label><label class="field"><span>Color del envase</span><input type="color" name="c" value="#8c5a48"></label></div>
     <button class="btn accent" type="submit">Agregar a la tienda</button></form>`;
@@ -914,7 +1208,7 @@ function vModal(u){
 /* ============ acciones ============ */
 const A={
   authMode:d=>{ui.auth=d.m;render()},
-  demo:d=>{S.session=d.who;ui.tab='home';ui.atab='agenda';save();render();toast(d.who==='admin'?'Entraste como el salón':'Entraste como Sofía (clienta demo)')},
+  demo:d=>{setTimeout(checkReminders,500);S.session=d.who;ui.tab='home';ui.atab='agenda';save();render();toast(d.who==='admin'?'Entraste como '+LS():'Entraste como '+first(userBy(d.who).name)+' (demo)')},
   tab:d=>{const u=me();if(u.role==='admin'){ui.atab=d.t;if(d.t!=='clientes')ui.clientId=null}else{if(d.t==='book'&&(!ui.book||ui.tab!=='book'))startBooking();ui.tab=d.t}render();scrollTo(0,0)},
   openNotifs:()=>{ui.modal={type:'notifs'};render()},
   openProfile:()=>{ui.modal={type:'profile'};render()},
@@ -936,36 +1230,57 @@ const A={
       const a=getA(b.resched),prev={date:a.date,time:a.time};
       Object.assign(a,{prev,date:b.date,time:b.time,staffId:st.id,status:'pendiente',change:true,created:Date.now()});
       notify('admin',`${u.name} pidió cambiar su ${s.name}: ${fd(prev.date)} ${prev.time} → ${fd(b.date)} ${b.time} hs`,'cal');
-      toast('Pedido de cambio enviado al salón');
+      toast('Pedido de cambio enviado '+W('al salón','a la barbería'));
     }else{
       const note=(document.getElementById('bnote')||{}).value||'';
       const dep=depositFor(s),na={id:uid('a'),userId:u.id,serviceId:s.id,staffId:st.id,date:b.date,time:b.time,status:'pendiente',note,created:Date.now(),deposit:dep?{amount:dep,status:'pendiente'}:null};
       S.appts.push(na);if(dep)ui.modal={type:'payInfo',k:'appt',id:na.id};
       notify('admin',`${u.name} solicitó ${s.name} para el ${fd(b.date)} a las ${b.time} hs`,'plus');
-      toast('¡Listo! Te avisamos cuando el salón confirme');
+      toast('¡Listo! Te avisamos cuando '+LS()+' confirme');
     }
     ui.book=null;ui.tab='turnos';ui.turnos='prox';save();render();scrollTo(0,0);
   },
   resched:d=>{
     const a=getA(d.id);
-    if(!canChange(a))return toast(`Los cambios se hacen con ${S.salon.cancelHours} hs de anticipación. Llamá al salón.`);
+    if(!canChange(a))return toast(`Los cambios se hacen con ${S.salon.cancelHours} hs de anticipación. Llamá ${W('al salón','a la barbería')}.`);
     ui.book={step:2,serviceId:a.serviceId,staffId:a.staffId,date:isOpen(a.date)&&a.date>=today()?a.date:nextOpen(0),time:null,resched:a.id};
     ui.tab='book';ui.modal=null;render();scrollTo(0,0);
   },
   acceptProp:d=>{const a=getA(d.id),u=me();a.status='confirmado';a.change=false;notify('admin',`${u.name} aceptó el horario propuesto: ${fd(a.date)} ${a.time} hs`,'check');save();render();toast('¡Turno confirmado!')},
-  askCancel:d=>{const a=getA(d.id),u=me();if(u.role!=='admin'&&!canChange(a))return toast(`Solo se puede cancelar hasta ${S.salon.cancelHours} hs antes. Llamá al salón.`);ui.modal={type:'cancel',id:d.id};render()},
+  askCancel:d=>{const a=getA(d.id),u=me();if(u.role!=='admin'&&!canChange(a))return toast(`Solo se puede cancelar hasta ${S.salon.cancelHours} hs antes. Llamá ${W('al salón','a la barbería')}.`);ui.modal={type:'cancel',id:d.id};render()},
   doCancel:d=>{
     const a=getA(d.id),u=me(),s=svc(a.serviceId),r=(document.getElementById('creason')||{}).value||'';
     a.status='cancelado';a.cancelBy=u.role;a.reason=r;
-    if(u.role==='admin')notify(a.userId,`El salón canceló tu turno de ${s.name} del ${fd(a.date)} ${a.time} hs.${r?' “'+r+'”':''} Podés reservar otro cuando quieras.`,'x');
+    if(u.role==='admin')notify(a.userId,`${CS()} canceló tu turno de ${s.name} del ${fd(a.date)} ${a.time} hs.${r?' “'+r+'”':''} Podés reservar otro cuando quieras.`,'x');
     else notify('admin',`${u.name} canceló ${s.name} del ${fd(a.date)} ${a.time} hs${r?' · “'+r+'”':''}`,'x');
-    ui.modal=null;save();render();toast(u.role==='admin'?'Turno cancelado · se avisó a la clienta':'Turno cancelado');
+    if(u.role==='admin')offerWa(a,'cancelado',r?'Motivo: '+r+'.':'');else ui.modal=null;
+    save();render();toast(u.role==='admin'?'Turno cancelado · aviso en la app':'Turno cancelado');
   },
   turnosV:d=>{ui.turnos=d.v;render()},
   // tienda
   shopCat:d=>{ui.shopCat=d.c;render()},
   qty:d=>{const p=prodBy(d.id),q=(ui.cart[d.id]||0)+Number(d.d);if(q>p.stock)return toast('No hay más stock de este producto');if(q<=0)delete ui.cart[d.id];else ui.cart[d.id]=q;if(ui.modal&&!cartCount())ui.modal=null;render()},
   openCart:()=>{ui.modal={type:'cart'};render()},
+  pickOpt:(d,el)=>{const f=el.closest('form');const was=el.classList.contains('on');el.parentNode.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));if(!was)el.classList.add('on');if(f[d.f])f[d.f].value=was?'':d.v},
+  setStyle:d=>{if(S.salon.style===d.v)return;S.salon.style=d.v;save();render();toast(d.v==='barber'?'Estilo Barbería activado':'Estilo Salón activado')},
+  askSample:d=>{ui.modal={type:'sample',v:d.v};render()},
+  doSample:()=>{loadSample(ui.modal.v);ui.modal=null;save();render();toast('Datos de ejemplo cargados')},
+  newSvc:()=>{ui.modal={type:'svc'};render()},
+  delSvc:d=>{const used=S.appts.some(a=>a.serviceId===d.id&&ACTIVE.includes(a.status));
+    if(used)return toast('Tiene turnos pendientes o confirmados: cambiale el nombre o esperá a que pasen');
+    if(S.services.length<=1)return toast('Tiene que quedar al menos un servicio');
+    S.services=S.services.filter(x=>x.id!==d.id);save();render();toast('Servicio quitado')},
+  openLicPay:()=>{ui.modal={type:'licPay'};render()},
+  licInform:()=>{S.license.informed=Date.now();notify('creator',`${S.salon.name} informó el pago del abono (${money(S.license.amount)}).`,'check');ui.modal=null;save();render();toast('¡Gracias! Avisamos que pagaste')},
+  licWarn:()=>{const L=S.license;if(L.status!=='suspendida')L.status='aviso';L.warnedAt=Date.now();
+    notify('admin',`Pago pendiente: el abono de ${APP()} (${money(L.amount)}) vence${today()>L.due?'ió':''} el ${fd(L.due)}. Pagalo para evitar la suspensión.`,'bell');
+    offerLicWa('aviso');save();render();toast('Aviso de pago enviado al panel')},
+  licAskSuspend:()=>{ui.modal={type:'licSuspend'};render()},
+  licSuspend:()=>{S.license.status='suspendida';notify('admin',`Servicio suspendido por falta de pago (${money(S.license.amount)}).`,'x');offerLicWa('suspendida');save();render();toast('Servicio suspendido')},
+  licPaid:()=>{const L=S.license;L.history=L.history||[];L.history.unshift({ts:Date.now(),amount:L.amount,due:L.due});
+    const base=today()>L.due?new Date():pISO(L.due);base.setMonth(base.getMonth()+1);L.due=iso(base);L.status='activa';L.informed=null;
+    notify('admin',`Recibimos tu pago de ${APP()}. ¡Gracias! Próximo vencimiento: ${fd(L.due)}.`,'check');offerLicWa('pagado');save();render();toast('Pago registrado · servicio activo')},
+  askNotif:()=>{try{const r=Notification.requestPermission();(r&&r.then?r:Promise.resolve(Notification.permission)).then(p=>{render();toast(p==='granted'?'Avisos activados':'No se activaron los avisos')}).catch(()=>toast('Este navegador no permite avisos'))}catch(e){toast('Este navegador no permite avisos')}},
   payM:d=>{ui.payMethod=d.m;render()},
   copy:d=>{const v=d.v;try{navigator.clipboard.writeText(v).then(()=>toast('Copiado: '+v),()=>toast('Copialo a mano: '+v))}catch(e){toast('Copialo a mano: '+v)}},
   openPay:d=>{ui.modal={type:'payInfo',k:d.k,id:d.id};render()},
@@ -974,12 +1289,12 @@ const A={
       notify('admin',`${u.name} informó el pago de la seña (${money(a.deposit.amount)} · ${PML[ui.payMethod]}) para ${svc(a.serviceId).name} del ${fd(a.date)}`,'check');}
     else{const o=S.orders.find(x=>x.id===d.id);o.pay.status='informado';
       notify('admin',`${orderName(o)} informó el pago del pedido Nº ${o.id.slice(-5).toUpperCase()} · ${money(o.total)} · ${PML[o.pay.method]}`,'check');}
-    ui.modal=null;save();render();toast('¡Gracias! El salón va a verificar el pago');
+    ui.modal=null;save();render();toast('¡Gracias! '+CS()+' va a verificar el pago');
   },
   depPaid:d=>{const a=getA(d.id);a.deposit.status='pagado';notify(a.userId,`Recibimos tu seña de ${money(a.deposit.amount)} para ${svc(a.serviceId).name} del ${fd(a.date)}.`,'check');save();render();toast('Seña marcada como recibida')},
   orderPaid:d=>{const o=S.orders.find(x=>x.id===d.id);o.pay.status='pagado';if(o.userId)notify(o.userId,`Recibimos el pago de tu pedido de ${money(o.total)}.`,'check');save();render();toast('Pago registrado')},
   guestRegister:()=>{ui.guestShop=false;ui.auth='register';ui.modal=null;render();scrollTo(0,0)},
-  guestShop:()=>{ui.guestShop=true;ui.shopCat='Todo';render();scrollTo(0,0)},
+  guestShop:()=>{if(OFF())return;ui.guestShop=true;ui.shopCat='Todo';render();scrollTo(0,0)},
   guestExit:()=>{ui.guestShop=false;ui.auth='login';ui.modal=null;render();scrollTo(0,0)},
   checkout:()=>{
     if(!me()){ui.modal={type:'guestCheckout'};return render()}
@@ -998,20 +1313,20 @@ const A={
   aDay:d=>{ui.aday=d.d;render()},
   accept:d=>{const a=getA(d.id),s=svc(a.serviceId);a.status='confirmado';a.change=false;
     notify(a.userId,`¡Tu turno está confirmado! ${s.name} el ${fd(a.date)} a las ${a.time} hs con ${staffBy(a.staffId)?.name||'el equipo'}.`,'check');
-    save();render();toast('Turno confirmado · se avisó a la clienta')},
+    offerWa(a,'confirmado');save();render();toast('Turno confirmado · aviso en la app enviado')},
   reject:d=>{const a=getA(d.id),s=svc(a.serviceId);
     if(a.change&&a.prev){Object.assign(a,{date:a.prev.date,time:a.prev.time,status:'confirmado',change:false});
       notify(a.userId,`No pudimos pasar tu ${s.name} al nuevo horario. Tu turno sigue el ${fd(a.date)} a las ${a.time} hs.`,'cal');}
     else{a.status='rechazado';notify(a.userId,`No tenemos lugar para ${s.name} el ${fd(a.date)} a las ${a.time} hs. Elegí otro horario y te lo confirmamos.`,'x')}
-    save();render();toast('Respuesta enviada a la clienta')},
+    offerWa(a,a.status==='rechazado'?'rechazado':'cambioRechazado');save();render();toast('Respuesta enviada · aviso en la app')},
   propose:d=>{const a=getA(d.id);ui.modal={type:'propose',id:a.id,date:isOpen(a.date)?a.date:nextOpen(0),time:null};render()},
   pDate:d=>{ui.modal.date=d.d;ui.modal.time=null;render()},
   pTime:d=>{ui.modal.time=d.t;render()},
   doPropose:()=>{const m=ui.modal,a=getA(m.id),s=svc(a.serviceId),st=pickStaff(s,m.date,m.time,'any',a.id);
     if(!st)return toast('Ese horario ya no está libre');
     Object.assign(a,{prev:{date:a.date,time:a.time},date:m.date,time:m.time,staffId:st.id,status:'propuesto',change:false});
-    notify(a.userId,`El salón te propone otro horario para ${s.name}: ${fd(a.date)} a las ${a.time} hs con ${st.name}. Entrá para aceptarlo.`,'cal');
-    ui.modal=null;save();render();toast('Propuesta enviada')},
+    notify(a.userId,`${CS()} te propone otro horario para ${s.name}: ${fd(a.date)} a las ${a.time} hs con ${st.name}. Entrá para aceptarlo.`,'cal');
+    offerWa(a,'propuesto');save();render();toast('Propuesta enviada · aviso en la app')},
   done:d=>{const a=getA(d.id);ui.modal={type:'record',userId:a.userId,apptId:a.id};render()},
   newRecord:d=>{ui.modal={type:'record',userId:d.id,apptId:null};render()},
   pickHair:(d,el)=>{const f=el.closest('form');const was=el.classList.contains('on');el.parentNode.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));
@@ -1023,12 +1338,19 @@ const A={
   ashop:d=>{ui.ashop=d.v;render()},
   orderNext:d=>{const o=S.orders.find(x=>x.id===d.id);
     if(o.status==='nuevo'){o.status='listo';if(o.userId)notify(o.userId,`Tu pedido de ${money(o.total)} está listo para retirar en ${S.salon.name}.`,'bag')}else o.status='entregado';
-    save();render();toast(o.status==='listo'?'Se avisó a la clienta':'Pedido entregado')},
+    save();render();toast(o.status==='listo'?'Se avisó '+W('a la clienta','al cliente'):'Pedido entregado')},
   stock:d=>{const p=prodBy(d.id);p.stock=Math.max(0,p.stock+Number(d.d));save();render()},
   newProduct:()=>{ui.modal={type:'product'};render()}
 };
 
 const F={
+  newSvc:d=>{const cat=(d.cat||'').trim()||'General';S.services.push({id:uid('s'),name:d.name.trim(),cat,dur:Number(d.dur)||30,price:Number(d.price)||0});
+    S.staff.forEach(st=>{if(!st.cats.includes(cat))st.cats.push(cat)});ui.modal=null;save();render();toast('Servicio agregado')},
+  licSettings:d=>{const L=S.license;L.amount=Number(d.amount)||0;if(d.due)L.due=d.due;
+    const cbu=(d.cbu||'').replace(/\s/g,'');if(cbu&&!/^\d{22}$/.test(cbu))return toast('El CBU/CVU tiene que tener 22 números');
+    L.pay={alias:(d.alias||'').trim(),cbu,holder:(d.holder||'').trim(),mpLink:(d.mpLink||'').trim(),note:d.note||''};
+    if(d.cpass&&d.cpass.length>=4){const c=S.users.find(u=>u.role==='creator');if(c)c.pass=d.cpass}
+    save();render();toast('Guardado')},
   paySettings:d=>{
     const p={cash:!!d.cash,debit:!!d.debit,transfer:!!d.transfer,mp:!!d.mp,alias:(d.alias||'').trim(),cbu:(d.cbu||'').replace(/\s/g,''),holder:(d.holder||'').trim(),bank:(d.bank||'').trim(),cuit:(d.cuit||'').trim(),mpLink:(d.mpLink||'').trim(),depositOn:!!d.depositOn,depositPct:Math.min(100,Math.max(0,Number(d.depositPct)||0)),note:d.note||''};
     if(!p.cash&&!p.debit&&!p.transfer&&!p.mp)return toast('Elegí al menos un medio de pago');
@@ -1039,7 +1361,7 @@ const F={
     S.salon.pay=p;save();render();toast('Datos de pago guardados');
   },
   salonLogin:d=>{const user=d.user.trim().toLowerCase();
-    const u=S.users.find(x=>x.role==='admin'&&(String(x.username||'').toLowerCase()===user||x.email.toLowerCase()===user)&&x.pass===d.pass);
+    const u=S.users.find(x=>(x.role==='admin'||x.role==='creator')&&(String(x.username||'').toLowerCase()===user||x.email.toLowerCase()===user)&&x.pass===d.pass);
     if(!u)return toast('Usuario o contraseña incorrectos');S.session=u.id;ui.atab='agenda';ui.auth='login';save();render();toast('Bienvenido al panel')},
   guestOrder:d=>{
     const items=Object.entries(ui.cart).filter(([,q])=>q>0).map(([pid,qty])=>({pid,qty}));
@@ -1058,32 +1380,38 @@ const F={
     if(S.users.some(x=>x.email.toLowerCase()===email))return toast('Ya existe una cuenta con ese email');
     const u={id:uid('u'),email,pass:d.pass,name:d.name.trim(),phone:d.phone||'',role:'client',since:today()};
     S.users.push(u);S.session=u.id;
-    notify('admin',`Nueva clienta registrada: ${u.name}`,'users');
+    notify('admin',`${W('Nueva clienta registrada','Nuevo cliente registrado')}: ${u.name}`,'users');
     notify(u.id,`¡Bienvenida a ${S.salon.name}! Ya podés reservar tu primer turno.`,'sparkle');
     ui.tab='home';save();render();toast('Cuenta creada')},
   record:d=>{
     const hair=(d.hcode||d.hname)?{code:d.hcode||'—',name:d.hname||'',hex:d.hhex,formula:d.hformula||''}:null;
     const nails=d.nname?{name:d.nname,hex:d.nhex,brand:d.nbrand||''}:null;
-    S.records.push({id:uid('r'),userId:d.userId,date:d.date,serviceId:d.serviceId,staffId:d.staffId,hair,nails,notes:d.notes||''});
+    const cut=(d.cstyle||d.cmachine||d.cfade||d.cbeard)?{style:d.cstyle||'',machine:d.cmachine||'',fade:d.cfade||'',beard:d.cbeard||''}:null;
+    S.records.push({id:uid('r'),userId:d.userId,date:d.date,serviceId:d.serviceId,staffId:d.staffId,hair,nails,cut,notes:d.notes||''});
     if(d.apptId){const a=getA(d.apptId);if(a)a.status='realizado'}
-    notify(d.userId,'Sumamos un registro a tu pasaporte de color ✦','drop');
-    ui.modal=null;save();render();toast('Guardado en el pasaporte');
+    notify(d.userId,W('Sumamos un registro a tu pasaporte de color ✦','Sumamos tu corte a tu historial ✦'),W('drop','scissors'));
+    ui.modal=null;save();render();toast(W('Guardado en el pasaporte','Guardado en el historial'));
   },
   product:d=>{S.products.push({id:uid('p'),name:d.name,brand:d.brand,cat:d.cat,price:Number(d.price),stock:Number(d.stock),c:d.c,shape:d.shape});ui.modal=null;save();render();toast('Producto agregado')},
   settings:d=>{Object.assign(S.salon,{name:d.name,open:d.open,close:d.close,phone:d.phone,address:d.address,cancelHours:Number(d.cancelHours)||0});
-    S.services.forEach(x=>{if(d['sname_'+x.id])x.name=d['sname_'+x.id];if(d['sprice_'+x.id]!==undefined)x.price=Number(d['sprice_'+x.id])||0});
+    S.services.forEach(x=>{if(d['sname_'+x.id])x.name=d['sname_'+x.id];if(d['sprice_'+x.id]!==undefined)x.price=Number(d['sprice_'+x.id])||0;if(d['sdur_'+x.id])x.dur=Number(d['sdur_'+x.id])||x.dur});
     const adm=S.users.find(u=>u.role==='admin');if(adm){const em=(d.aemail||'').trim().toLowerCase();if(em&&S.users.some(u=>u!==adm&&u.email.toLowerCase()===em))return toast('Ese email ya lo usa una clienta');if(em)adm.email=em;adm.username=d.ausername.trim().toLowerCase();if(d.apass&&d.apass.length>=4)adm.pass=d.apass}
     save();render();toast('Cambios guardados')}
 };
 
 document.addEventListener('click',e=>{
   if(e.target.dataset&&e.target.dataset.scrim){ui.modal=null;return render()}
+  const rem=e.target.closest('[data-rem]');
+  if(rem){const a=getA(rem.dataset.rem);if(a&&rem.dataset.k==='recordatorio'){a.reminded=true;save()}
+    if(ui.modal&&/^wa/.test(ui.modal.type))ui.modal=null;setTimeout(()=>{render();toast('WhatsApp abierto con el mensaje listo')},400);return}
   const el=e.target.closest('[data-a]');if(!el)return;
   const fn=A[el.dataset.a];if(fn){e.preventDefault();fn(el.dataset,el)}
 });
 document.addEventListener('submit',e=>{const f=e.target.closest('[data-form]');if(!f)return;e.preventDefault();const fn=F[f.dataset.form];if(fn)fn(Object.fromEntries(new FormData(f)),f)});
 document.addEventListener('input',e=>{if(e.target.dataset.in==='clientQ'){ui.clientQ=e.target.value;const l=document.getElementById('clist');if(l)l.innerHTML=clientRows()}});
 render();
+checkReminders();
+setInterval(()=>{checkReminders();const u=me();if(u&&!ui.modal&&!document.querySelector('input:focus,textarea:focus,select:focus')&&((u.role==='client'&&ui.tab==='home')||(u.role==='admin'&&ui.atab==='agenda')))render()},60000);
 </script>
 </body>
 </html>
