@@ -28,12 +28,17 @@ App para peluquerías, centros de estilistas y salones de uñas. Un solo archivo
 ## Demo
 
 - Clienta demo: botón "Probar como clienta demo" (sofia@demo.com / 1234)
-- Salón: email `salon@demo.com` (o usuario `salon`) / contraseña `admin`. Se puede entrar desde "Ingresar" o desde "Acceso salón". Cambiarlos en Ajustes → Acceso al panel.
+- Demo (archivo local): clienta `sofia@demo.com` / `1234`, salón `salon` / `admin`.
 
-## Importante
+## Modo online (Firebase)
 
-Esta versión guarda los datos en el navegador (localStorage): sirve como demo. Para uso real con varios dispositivos hay que conectarla a una base de datos (Firebase).
+En `stilista-phi.vercel.app` la app funciona con Firebase: cada comercio tiene su link (`/nombre-del-comercio`), su estilo (Mujer · Salón u Hombre · Barbería) y sus datos separados. Abriendo el archivo local o con `?demo` funciona como demo sin conexión.
+
+- `firestore.rules`: reglas de seguridad (reemplazar EMAIL_DEL_CREADOR y pegarlas en Firestore → Reglas).
+- `api/push.js`: envía notificaciones push (Firebase Cloud Messaging).
+- `api/reminders.js`: recordatorio 30 minutos antes. Llamarlo cada 5 minutos con `?key=CRON_SECRET`.
+- Variables de entorno en Vercel: `FIREBASE_SERVICE_ACCOUNT` (JSON de la cuenta de servicio), `CREATOR_EMAIL`, `CRON_SECRET`.
 
 ## Deploy
 
-Vercel → Add New → Project → importar este repo → Deploy. No requiere configuración.
+Vercel → importar este repo → Deploy.

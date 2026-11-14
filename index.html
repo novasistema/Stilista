@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Stilista — Turnos, tienda y pasaporte de color</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#1E1A17">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -502,14 +506,237 @@ function loadSample(kind){
   if(kind==='salon'&&S.salon.name==='Barbería Roble')S.salon.name='Estudio Alma';
   ui.cart={};ui.clientId=null;ui.book=null;
 }
+const LIVE=(()=>{try{return /^https?:$/.test(location.protocol)&&!/claude|anthropic|usercontent|localhost|127\.0\.0\.1/.test(location.hostname)&&!/[?&]demo\b/.test(location.search)}catch(e){return false}})();
+const CTX={sid:null,slug:null,ready:!LIVE,notFound:false,noRole:false,role:null,salonLoaded:false,registering:false,error:null};
+/* ============ FIREBASE (modo online) ============ */
+const FB_CONFIG={apiKey:"AIzaSyAWm7HIsDcshGwjfXee_F_rojKmA0Isj4o",authDomain:"stilista-80a18.firebaseapp.com",projectId:"stilista-80a18",storageBucket:"stilista-80a18.firebasestorage.app",messagingSenderId:"832710411212",appId:"1:832710411212:web:2c678684def46cd4f35369"};
+const VAPID="BFJRiBYZ_DlozQbUeG8g3KchH2H2Rsfe2f2eRPp5WKkwOOgb1tvn5UEXVZCfN6NHrRQYKjIERiSNEJVXIWR9Z4A";
+const FBV='https://www.gstatic.com/firebasejs/10.12.2/';
+let FB=null;const synced={};let unsubs=[],salonUnsubs=[],pendingRender=false;const seenNotifs=new Set();const bootTs=Date.now();
+const C={salons:[],lic:{},notifs:[]};
+function stable(o){if(o===null||typeof o!=='object')return JSON.stringify(o);if(Array.isArray(o))return '['+o.map(stable).join(',')+']';return '{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}'}
+const clean=o=>JSON.parse(JSON.stringify(o));
+function livePay(){return {cash:true,debit:true,transfer:false,mp:false,alias:'',cbu:'',holder:'',bank:'',cuit:'',mpLink:'',depositOn:false,depositPct:30,note:''}}
+function emptyState(){return {salon:{name:'Stilista',open:'09:00',close:'20:00',cancelHours:3,phone:'',address:'',pay:livePay(),style:'salon'},services:[],staff:[],products:[],users:[],appts:[],slots:[],records:[],orders:[],notifs:[],license:defaultLicense(),session:null}}
+const salonPayload=()=>({salon:S.salon,services:S.services,staff:S.staff,products:S.products});
+function errMsg(e){const c=(e&&e.code)||'';
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Email o contraseña incorrectos';
+  if(/email-already-in-use/.test(c))return 'Ya existe una cuenta con ese email';
+  if(/weak-password/.test(c))return 'La contraseña tiene que tener al menos 6 caracteres';
+  if(/invalid-email/.test(c))return 'El email no es válido';
+  if(/network/.test(c))return 'Sin conexión. Probá de nuevo';
+  if(/too-many-requests/.test(c))return 'Demasiados intentos. Esperá unos minutos';
+  if(/permission-denied/.test(c))return 'No tenés permiso para hacer eso';
+  if(/requires-recent-login/.test(c))return 'Por seguridad, cerrá sesión, volvé a entrar y probá de nuevo';
+  return 'Algo salió mal ('+(c||e.message||e)+')'}
+function schedRender(){const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.closest('form')){pendingRender=true;return}render()}
+document.addEventListener('focusout',()=>{if(pendingRender){setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))){pendingRender=false;render()}},200)}});
+let syncT=null;function scheduleSync(){clearTimeout(syncT);syncT=setTimeout(syncNow,60)}
+async function syncNow(){
+  if(!FB)return;const {fs,db}=FB;const u=me();const sid=CTX.sid||CTX.slug;if(!sid)return;
+  const role=u?u.role:null,jobs=[];
+  if(role==='admin'){
+    const j=stable(salonPayload());if(synced.salon!==j){synced.salon=j;jobs.push(fs.setDoc(fs.doc(db,'salons',sid),clean(salonPayload()),{merge:true}))}
+    if(S.license.informed&&synced.licInf!==String(S.license.informed)){synced.licInf=String(S.license.informed);jobs.push(fs.updateDoc(fs.doc(db,'licenses',sid),{informed:S.license.informed}))}
+  }
+  for(const col of ['appts','records','orders','notifs']){for(const it of S[col]){
+    const k=col+'/'+it.id,j=stable(it);if(synced[k]===j)continue;const isNew=!(k in synced);synced[k]=j;
+    jobs.push(fs.setDoc(fs.doc(db,'salons',sid,col,it.id),clean(it)).then(()=>{if(col==='notifs'&&isNew)pushRemote(sid,it.id)}));
+    if(col==='appts')jobs.push(fs.setDoc(fs.doc(db,'salons',sid,'slots',it.id),{staffId:it.staffId,date:it.date,time:it.time,dur:svc(it.serviceId).dur,active:ACTIVE.includes(it.status)}));
+  }}
+  const res=await Promise.allSettled(jobs);const bad=res.filter(r=>r.status==='rejected');
+  if(bad.length){console.warn('sync',bad.map(r=>r.reason));toast(errMsg(bad[0].reason))}
+}
+async function pushRemote(sid,id){try{const cu=FB&&FB.auth.currentUser;if(!cu)return;const t=await cu.getIdToken();
+  fetch('/api/push',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({sid,id})}).catch(()=>{})}catch(e){}}
+function setCol(col,snap){
+  const docs=snap.docs.map(d=>({...d.data(),id:d.id}));const ids=new Set(docs.map(d=>d.id));
+  docs.forEach(d=>{synced[col+'/'+d.id]=stable(d)});
+  const pending=(S[col]||[]).filter(it=>!((col+'/'+it.id) in synced)&&!ids.has(it.id));
+  S[col]=[...docs,...pending];
+  if(col==='notifs'){S.notifs.sort((a,b)=>b.ts-a.ts);const u=me();
+    S.notifs.forEach(n=>{if(!seenNotifs.has(n.id)){seenNotifs.add(n.id);if(u&&!n.read&&n.ts>bootTs&&(n.to===u.id||(n.to==='admin'&&u.role==='admin'))){toast(n.text);pushLocal(n.text)}}})}
+  schedRender();
+}
+async function initLive(){
+  try{
+    const [app,auth,fs]=await Promise.all([import(FBV+'firebase-app.js'),import(FBV+'firebase-auth.js'),import(FBV+'firebase-firestore.js')]);
+    const a=app.initializeApp(FB_CONFIG);
+    FB={app,authM:auth,fs,a,auth:auth.getAuth(a),db:fs.getFirestore(a)};
+  }catch(e){CTX.error='No se pudo conectar. Revisá tu conexión y recargá la página.';CTX.ready=true;return render()}
+  const seg=decodeURIComponent(location.pathname.split('/')[1]||'').toLowerCase();
+  CTX.slug=/^[a-z0-9-]{2,40}$/.test(seg)&&seg!=='index.html'?seg:null;
+  if(CTX.slug)attachSalon(CTX.slug);
+  FB.authM.onAuthStateChanged(FB.auth,u=>onAuth(u));
+}
+function attachSalon(sid){
+  salonUnsubs.forEach(f=>f());salonUnsubs=[];const {fs,db}=FB;CTX.sid=sid;
+  salonUnsubs.push(fs.onSnapshot(fs.doc(db,'salons',sid),d=>{
+    if(!d.exists()){CTX.notFound=true;return schedRender()}CTX.notFound=false;const x=d.data();
+    S.salon=Object.assign(emptyState().salon,x.salon||{});if(!S.salon.pay)S.salon.pay=livePay();
+    S.services=x.services||[];S.staff=x.staff||[];S.products=x.products||[];synced.salon=stable(salonPayload());CTX.salonLoaded=true;schedRender()},e=>console.warn(e)));
+  salonUnsubs.push(fs.onSnapshot(fs.doc(db,'licenses',sid),d=>{S.license=Object.assign(defaultLicense(),d.exists()?d.data():{});synced.licInf=String(S.license.informed||'');schedRender()},e=>console.warn(e)));
+  salonUnsubs.push(fs.onSnapshot(fs.collection(db,'salons',sid,'slots'),q=>{S.slots=q.docs.map(d=>({...d.data(),id:d.id}));schedRender()},e=>console.warn(e)));
+}
+async function onAuth(user){
+  if(CTX.registering)return;
+  unsubs.forEach(f=>f());unsubs=[];
+  ['appts','records','orders','notifs'].forEach(c=>S[c]=[]);S.users=[];S.session=null;CTX.noRole=false;CTX.role=null;
+  if(!user){CTX.ready=true;return render()}
+  const {fs,db}=FB;
+  let ud=null;try{const d=await fs.getDoc(fs.doc(db,'users',user.uid));ud=d.exists()?d.data():null}catch(e){}
+  if(!ud||!ud.role){
+    try{await fs.getDocs(fs.query(fs.collection(db,'creatorNotifs'),fs.limit(1)));ud={role:'creator',name:'Creador',email:user.email}}catch(e){}
+  }
+  if(!ud){CTX.noRole=true;S.session=user.uid;S.users=[{id:user.uid,role:'none',name:user.email,email:user.email}];CTX.ready=true;return render()}
+  CTX.role=ud.role;S.session=user.uid;
+  if(ud.role==='creator'){S.users=[{id:user.uid,role:'creator',name:'Creador',email:user.email}];attachCreator(user.uid);CTX.ready=true;return render()}
+  const sid=ud.salonId;
+  if(sid&&sid!==CTX.sid){attachSalon(sid);try{history.replaceState(null,'','/'+sid)}catch(e){}CTX.slug=sid}
+  const self={id:user.uid,role:ud.role,name:ud.role==='admin'?(ud.name||S.salon.name):ud.name,email:user.email,phone:ud.phone||'',since:ud.since};
+  S.users=[self];
+  const col=n=>fs.collection(db,'salons',sid,n);
+  if(ud.role==='admin'){
+    ['appts','records','orders'].forEach(n=>unsubs.push(fs.onSnapshot(col(n),q=>setCol(n,q),e=>console.warn(e))));
+    unsubs.push(fs.onSnapshot(fs.query(col('notifs'),fs.where('to','==','admin')),q=>setCol('notifs',q),e=>console.warn(e)));
+    unsubs.push(fs.onSnapshot(col('members'),q=>{S.users=[self,...q.docs.map(d=>({...d.data(),id:d.id,role:'client'}))];schedRender()},e=>console.warn(e)));
+  }else{
+    ['appts','records','orders'].forEach(n=>unsubs.push(fs.onSnapshot(fs.query(col(n),fs.where('userId','==',user.uid)),q=>setCol(n,q),e=>console.warn(e))));
+    unsubs.push(fs.onSnapshot(fs.query(col('notifs'),fs.where('to','==',user.uid)),q=>setCol('notifs',q),e=>console.warn(e)));
+  }
+  CTX.ready=true;render();setTimeout(checkReminders,1500);
+  try{if(Notification.permission==='granted')enablePush(true)}catch(e){}
+}
+function attachCreator(uid){
+  const {fs,db}=FB;
+  unsubs.push(fs.onSnapshot(fs.collection(db,'salons'),q=>{C.salons=q.docs.map(d=>({...d.data(),id:d.id}));schedRender()},e=>console.warn(e)));
+  unsubs.push(fs.onSnapshot(fs.collection(db,'licenses'),q=>{C.lic={};q.docs.forEach(d=>C.lic[d.id]=Object.assign(defaultLicense(),d.data()));schedRender()},e=>console.warn(e)));
+  unsubs.push(fs.onSnapshot(fs.query(fs.collection(db,'creatorNotifs'),fs.orderBy('ts','desc'),fs.limit(40)),q=>{S.notifs=q.docs.map(d=>({...d.data(),id:d.id,to:uid}));
+    S.notifs.forEach(n=>{if(!seenNotifs.has(n.id)){seenNotifs.add(n.id);if(!n.read&&n.ts>bootTs){toast(n.text);pushLocal(n.text)}}});schedRender()},e=>console.warn(e)));
+}
+async function enablePush(silent){
+  try{
+    if(!('serviceWorker' in navigator)||!('Notification' in window))throw new Error('unsupported');
+    const perm=Notification.permission==='granted'?'granted':await Notification.requestPermission();
+    if(perm!=='granted'){if(!silent)toast('No se activaron los avisos');return render()}
+    const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const m=await import(FBV+'firebase-messaging.js');const msg=m.getMessaging(FB.a);
+    const token=await m.getToken(msg,{vapidKey:VAPID,serviceWorkerRegistration:reg});
+    const cu=FB.auth.currentUser;if(token&&cu&&CTX.role!=='creator')await FB.fs.setDoc(FB.fs.doc(FB.db,'users',cu.uid),{tokens:FB.fs.arrayUnion(token)},{merge:true});
+    if(token&&cu&&CTX.role==='creator')await FB.fs.setDoc(FB.fs.doc(FB.db,'creatorTokens',cu.uid),{tokens:FB.fs.arrayUnion(token)},{merge:true});
+    m.onMessage(msg,p=>{const n=p.notification||{};if(n.body)toast(n.body)});
+    if(!silent){toast('Avisos activados en este celular');render()}
+  }catch(e){console.warn(e);if(!silent)toast(/unsupported/.test(e.message)?'Este navegador no permite avisos':'No se pudieron activar los avisos');render()}
+}
+async function creatorNotify(sid,text){try{await FB.fs.addDoc(FB.fs.collection(FB.db,'creatorNotifs'),{sid,salonName:S.salon.name,text,ts:Date.now(),read:false})}catch(e){console.warn(e)}}
+async function adminNotifyFromCreator(sid,text,icon){const id=uid('n');try{await FB.fs.setDoc(FB.fs.doc(FB.db,'salons',sid,'notifs',id),{id,to:'admin',text,ts:Date.now(),read:false,icon:icon||'bell'});pushRemote(sid,id)}catch(e){toast(errMsg(e))}}
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+/* ---- panel del creador (online) ---- */
+const licOf=sid=>C.lic[sid]||defaultLicense();
+const licStateOf=L=>L.status==='suspendida'?'suspendida':(L.status==='aviso'||today()>L.due)?'aviso':'activa';
+function vCreatorLive(u){
+  const list=[...C.salons].sort((a,b)=>(a.salon?.name||'').localeCompare(b.salon?.name||''));
+  const st=list.map(s=>licStateOf(licOf(s.id)));
+  const monthly=list.reduce((t,s,i)=>t+(st[i]!=='suspendida'?Number(licOf(s.id).amount)||0:0),0);
+  const P=(list[0]&&licOf(list[0].id).pay)||{};
+  return `<div class="shell">${topbar(u,'Usuario creador')}<main class="fade-in">
+  <p class="eyebrow">Stilista · panel del creador</p><h1 class="display">Tus<br><em>comercios.</em></h1>
+  <div class="kpis"><div class="kpi"><b>${list.length}</b><span>comercios</span></div><div class="kpi"><b style="color:var(--accent)">${st.filter(x=>x!=='activa').length}</b><span>pago pendiente / susp.</span></div><div class="kpi"><b style="font-size:21px;line-height:1.5">${money(monthly)}</b><span>abonos activos/mes</span></div></div>
+  <button class="btn accent mt" data-a="cNew" style="margin-top:16px">${ic('plus',18)} Nuevo comercio</button>
+  ${list.length?'':`<div class="empty"><div class="big">Todavía no hay comercios</div>Creá el primero: cada uno tiene su estilo, sus datos y su propio link.</div>`}
+  ${list.map((s,i)=>{const L=licOf(s.id),ls=st[i],bar=(s.salon&&s.salon.style)==='barber',link=location.origin+'/'+s.id;
+    return `<div class="req" style="margin-top:14px">
+    <div class="who"><span class="av">${initials(s.salon?.name||s.id)}</span><div style="flex:1;min-width:0"><b>${esc(s.salon?.name||s.id)}</b><div class="small muted" style="overflow-wrap:anywhere">${esc(link.replace(/^https?:\/\//,''))}</div></div><span class="pill lic-${ls}">${LIC[ls]}</span></div>
+    <div class="row mt" style="flex-wrap:wrap"><button class="fchip ${bar?'':'on'}" data-a="cStyle" data-sid="${s.id}" data-v="salon">Mujer · Salón</button><button class="fchip ${bar?'on':''}" data-a="cStyle" data-sid="${s.id}" data-v="barber">Hombre · Barbería</button><button class="fchip" data-a="copy" data-v="${esc(link)}">Copiar link</button></div>
+    <div class="small" style="margin-top:12px">Abono <b>${money(L.amount)}</b> · ${today()>L.due?'venció':'vence'} el <b>${fd(L.due)}</b></div>
+    ${L.informed?`<p class="paytag pt-informado">Informó un pago ${rel(L.informed)} · verificalo</p>`:''}
+    <div class="row mt"><button class="btn accent" data-a="cPaid" data-sid="${s.id}">${ic('check',16)} ${ls==='suspendida'?'Pago y reactivar':'Registrar pago'}</button>${ls!=='suspendida'?`<button class="btn line" data-a="cWarn" data-sid="${s.id}">${ls==='aviso'?'Reenviar aviso':'Avisar que pague'}</button>`:''}</div>
+    ${ls!=='suspendida'?`<button class="btn line mt" data-a="cAskSuspend" data-sid="${s.id}" style="color:#c0392b;border-color:#c0392b">Suspender por falta de pago</button>`:''}
+    <details style="margin-top:12px"><summary class="small" style="cursor:pointer;font-weight:700">Abono y vencimiento</summary>
+      <form data-form="cLic" style="margin-top:10px"><input type="hidden" name="sid" value="${s.id}">
+      <div class="grid2f"><label class="field"><span>Abono mensual</span><input name="amount" type="number" min="0" step="100" value="${L.amount}"></label><label class="field"><span>Vence</span><input name="due" type="date" value="${L.due}"></label></div>
+      <button class="btn line sm" type="submit">Guardar</button></form></details>
+    </div>`}).join('')}
+  <p class="cat">Tus datos de cobro</p>
+  <p class="small muted" style="margin:-4px 0 10px">Los ven tus comercios cuando tienen que pagarte el abono.</p>
+  <form data-form="cPay">
+   <div class="grid2f"><label class="field"><span>Alias</span><input name="alias" value="${esc(P.alias||'')}" autocapitalize="none"></label><label class="field"><span>Titular</span><input name="holder" value="${esc(P.holder||'')}"></label></div>
+   <label class="field"><span>CBU / CVU</span><input name="cbu" value="${esc(P.cbu||'')}" inputmode="numeric" maxlength="22"></label>
+   <label class="field"><span>Link de pago Mercado Pago (opcional)</span><input name="mpLink" type="url" value="${esc(P.mpLink||'')}"></label>
+   <label class="field"><span>Mensaje (opcional)</span><input name="note" value="${esc(P.note||'')}"></label>
+   <button class="btn" type="submit">Guardar datos de cobro</button></form>
+  <p class="cat">Tu contraseña</p>
+  <form data-form="myPass"><label class="field"><span>Nueva contraseña</span><input name="pass" type="password" minlength="6" required autocomplete="new-password"></label><button class="btn line" type="submit">Cambiar contraseña</button></form>
+  <button class="btn line mt" data-a="logout" style="margin-top:22px">Cerrar sesión</button></main></div>`;
+}
+function slugify(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)}
+function catalogFor(style){if(style==='barber'){const b=seedBarber();return {services:b.services,staff:b.staff,products:b.products}}const x=seed();return {services:x.services,staff:x.staff,products:x.products}}
+const CA={
+  cNew:()=>{ui.modal={type:'cNew'};render()},
+  cStyle:async d=>{try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'salons',d.sid),{'salon.style':d.v});toast(d.v==='barber'?'Ahora es Hombre · Barbería':'Ahora es Mujer · Salón')}catch(e){toast(errMsg(e))}},
+  cWarn:async d=>{const L=licOf(d.sid);try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',d.sid),{status:L.status==='suspendida'?'suspendida':'aviso',warnedAt:Date.now()});
+    await adminNotifyFromCreator(d.sid,`Pago pendiente: el abono de Stilista (${money(L.amount)}) vence${today()>L.due?'ió':''} el ${fd(L.due)}. Pagalo para evitar la suspensión.`,'bell');toast('Aviso de pago enviado')}catch(e){toast(errMsg(e))}},
+  cAskSuspend:d=>{ui.modal={type:'cSuspend',sid:d.sid};render()},
+  cSuspend:async()=>{const sid=ui.modal.sid,L=licOf(sid);ui.modal=null;try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',sid),{status:'suspendida'});
+    await adminNotifyFromCreator(sid,`Servicio suspendido por falta de pago (${money(L.amount)}).`,'x');toast('Servicio suspendido')}catch(e){toast(errMsg(e))}render()},
+  cPaid:async d=>{const L=licOf(d.sid);const base=today()>L.due?new Date():pISO(L.due);base.setMonth(base.getMonth()+1);const due=iso(base);
+    try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',d.sid),{status:'activa',due,informed:null,history:[{ts:Date.now(),amount:L.amount,due:L.due},...(L.history||[])].slice(0,24)});
+      await adminNotifyFromCreator(d.sid,`Recibimos tu pago de Stilista. ¡Gracias! Próximo vencimiento: ${fd(due)}.`,'check');toast('Pago registrado · activo hasta el '+fd(due))}catch(e){toast(errMsg(e))}}
+};
+const CF={
+  cNew:async d=>{
+    const slug=slugify(d.slug||d.name);if(slug.length<2)return toast('Elegí un link más largo');
+    const {fs,db,app,authM}=FB;
+    try{const ex=await fs.getDoc(fs.doc(db,'salons',slug));if(ex.exists())return toast('Ese link ya existe, elegí otro')}catch(e){return toast(errMsg(e))}
+    toast('Creando comercio…');
+    let uidNew;const sec=app.initializeApp(FB_CONFIG,'sec'+Date.now());
+    try{const a2=authM.getAuth(sec);const cred=await authM.createUserWithEmailAndPassword(a2,d.email.trim(),d.pass);uidNew=cred.user.uid;await authM.signOut(a2)}
+    catch(e){return toast(errMsg(e))}
+    const cat=catalogFor(d.style);const P=(C.salons[0]&&licOf(C.salons[0].id).pay)||{alias:'',cbu:'',holder:'',mpLink:'',note:''};
+    try{
+      await fs.setDoc(fs.doc(db,'users',uidNew),{role:'admin',salonId:slug,email:d.email.trim().toLowerCase(),name:d.name.trim()});
+      await fs.setDoc(fs.doc(db,'salons',slug),{salon:{name:d.name.trim(),style:d.style,open:'09:00',close:'20:00',cancelHours:3,phone:d.phone||'',address:'',pay:livePay()},services:cat.services,staff:cat.staff,products:cat.products,ownerUid:uidNew,createdAt:Date.now()});
+      await fs.setDoc(fs.doc(db,'licenses',slug),{status:'activa',due:d.due||iso(addD(new Date(),30)),amount:Number(d.amount)||0,informed:null,pay:P,history:[]});
+      ui.modal={type:'cCreated',slug,email:d.email.trim(),name:d.name.trim()};render();
+    }catch(e){toast(errMsg(e))}
+  },
+  cLic:async d=>{try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',d.sid),{amount:Number(d.amount)||0,due:d.due});toast('Guardado')}catch(e){toast(errMsg(e))}},
+  cPay:async d=>{const cbu=(d.cbu||'').replace(/\s/g,'');if(cbu&&!/^\d{22}$/.test(cbu))return toast('El CBU/CVU tiene que tener 22 números');
+    const pay={alias:(d.alias||'').trim(),cbu,holder:(d.holder||'').trim(),mpLink:(d.mpLink||'').trim(),note:d.note||''};
+    try{await Promise.all(C.salons.map(s=>FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',s.id),{pay})));toast('Datos de cobro guardados')}catch(e){toast(errMsg(e))}},
+  myPass:async d=>{try{await FB.authM.updatePassword(FB.auth.currentUser,d.pass);toast('Contraseña cambiada')}catch(e){toast(errMsg(e))}}
+};
+function vCreatorModal(m){
+  if(m.type==='cNew')return `<h3>Nuevo <em>comercio</em></h3><p class="small muted">Se crea con su propio link, su estilo y sus datos separados.</p>
+    <form data-form="cNew" style="margin-top:14px">
+      <label class="field"><span>Nombre del comercio</span><input name="name" required placeholder="Barbería Roble" oninput="this.form.slug.placeholder=(this.value||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')"></label>
+      <label class="field"><span>Link (opcional)</span><input name="slug" placeholder="barberia-roble" autocapitalize="none"></label>
+      <p class="cat" style="margin-top:4px">Tipo de app</p>
+      <div class="stylepick"><label class="stylecard"><input type="radio" name="style" value="salon" checked> <b>Mujer · Salón</b><small>Peluquería, color y uñas</small></label><label class="stylecard"><input type="radio" name="style" value="barber"> <b>Hombre · Barbería</b><small>Corte, degradé y barba</small></label></div>
+      <label class="field"><span>Email del administrador</span><input name="email" type="email" required autocapitalize="none"></label>
+      <label class="field"><span>Contraseña inicial</span><input name="pass" type="text" minlength="6" required></label>
+      <label class="field"><span>Teléfono del comercio</span><input name="phone" inputmode="tel"></label>
+      <div class="grid2f"><label class="field"><span>Abono mensual</span><input name="amount" type="number" min="0" step="100" value="30000"></label><label class="field"><span>Primer vencimiento</span><input name="due" type="date" value="${iso(addD(new Date(),30))}"></label></div>
+      <button class="btn accent" type="submit">Crear comercio</button></form>`;
+  if(m.type==='cCreated'){const link=location.origin+'/'+m.slug;
+    return `<h3>¡Comercio <em>creado!</em></h3><p class="small muted">${esc(m.name)} ya tiene su app con servicios y productos de ejemplo para editar.</p>
+    <div class="paybox">${pl('Link',link)}${pl('Admin',m.email)}</div>
+    <p class="small">Pasale el link al comercio. Entra con ese email y la contraseña que pusiste, desde "Acceso" en su link.</p>
+    <button class="btn mt" data-a="closeModal">Listo</button>`}
+  if(m.type==='cSuspend'){const s=C.salons.find(x=>x.id===m.sid);return `<h3>¿Suspender <em>el servicio?</em></h3><p class="small muted" style="margin-top:6px">${esc(s?.salon?.name||m.sid)} va a ver una pantalla para pagar y sus clientes no van a poder sacar turnos ni comprar hasta que lo reactives. No se borra ningún dato.</p>
+    <div class="row mt" style="margin-top:18px"><button class="btn line" data-a="closeModal">Cancelar</button><button class="btn" data-a="cSuspend" style="background:#c0392b;color:#fff">Suspender</button></div>`}
+  return '';
+}
+
 let S;
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return seed()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-S=load();
+function save(){if(LIVE)return scheduleSync();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=LIVE?emptyState():load();
 if(!S.salon.pay)S.salon.pay=defaultPay();
 if(!S.salon.style)S.salon.style='salon';
 if(!S.license)S.license=defaultLicense();
-if(!S.users.some(u=>u.role==='creator'))S.users.push({id:'creator',username:'creador',email:'creador@demo.com',pass:'creador',name:'Creador',role:'creator'});
+if(!LIVE&&!S.users.some(u=>u.role==='creator'))S.users.push({id:'creator',username:'creador',email:'creador@demo.com',pass:'creador',name:'Creador',role:'creator'});
 const LIC={activa:'Activa',aviso:'Pago pendiente',suspendida:'Suspendida'};
 const licState=()=>S.license.status==='suspendida'?'suspendida':(S.license.status==='aviso'||today()>S.license.due)?'aviso':'activa';
 const OFF=()=>licState()==='suspendida';
@@ -525,12 +752,12 @@ const BEARDS=['Sin barba','Perfilado','Barba corta','Barba completa','Afeitado a
 const me=()=>S.users.find(u=>u.id===S.session);
 const svc=id=>S.services.find(s=>s.id===id)||{name:'Servicio',dur:60,price:0,cat:''};
 const staffBy=id=>S.staff.find(s=>s.id===id);
-const userBy=id=>S.users.find(u=>u.id===id)||{name:'Clienta'};
+const userBy=id=>S.users.find(u=>u.id===id)||{name:(S.appts.find(a=>a.userId===id&&a.userName)||{}).userName||W('Clienta','Cliente')};
 const prodBy=id=>S.products.find(p=>p.id===id);
 const getA=id=>S.appts.find(a=>a.id===id);
 const dt=a=>pISO(a.date).getTime()+toMin(a.time)*60000;
 const canChange=a=>dt(a)-Date.now()>S.salon.cancelHours*3600e3;
-function notify(to,text,icon='bell'){S.notifs.unshift({id:uid('n'),to,text,ts:Date.now(),read:false,icon});
+function notify(to,text,icon='bell'){if(LIVE&&to==='creator')return creatorNotify(CTX.sid,text);S.notifs.unshift({id:uid('n'),to,text,ts:Date.now(),read:false,icon});
   const u=me();if(u&&(to===u.id||(to==='admin'&&u.role==='admin')))pushLocal(text)}
 function pushLocal(text){try{if('Notification' in window&&Notification.permission==='granted')new Notification(S.salon.name,{body:text})}catch(e){}}
 const notifState=()=>{try{return 'Notification' in window?Notification.permission:'unsupported'}catch(e){return 'unsupported'}};
@@ -583,9 +810,12 @@ const OST={nuevo:'Nuevo',listo:'Listo para retirar',entregado:'Entregado'};
 /* ============ disponibilidad ============ */
 function isFree(staffId,date,start,dur,exclude){
   const s=toMin(start),e=s+dur;
-  return !S.appts.some(a=>{
-    if(a.id===exclude||a.staffId!==staffId||a.date!==date||!ACTIVE.includes(a.status))return false;
-    const as=toMin(a.time),ae=as+svc(a.serviceId).dur;return s<ae&&as<e});
+  const own=new Set(S.appts.map(a=>a.id));
+  const busy=[...S.appts.filter(a=>ACTIVE.includes(a.status)).map(a=>({id:a.id,staffId:a.staffId,date:a.date,time:a.time,dur:svc(a.serviceId).dur})),
+    ...(S.slots||[]).filter(x=>x.active&&!own.has(x.id))];
+  return !busy.some(a=>{
+    if(a.id===exclude||a.staffId!==staffId||a.date!==date)return false;
+    const as=toMin(a.time),ae=as+(a.dur||60);return s<ae&&as<e});
 }
 const qualified=service=>S.staff.filter(st=>st.cats.includes(service.cat));
 function pickStaff(service,date,time,staffId,exclude){
@@ -624,8 +854,17 @@ let ui={payMethod:null,guestShop:false,auth:'login',tab:'home',book:null,shopCat
 
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2800)}
 
+function vSimple(title,em,text,btn){return `<div class="shell"><main style="padding-top:60px"><div class="brand">Stilista</div><h1 class="display" style="margin-top:30px">${title}<br><em>${em}</em></h1><p class="lead">${text}</p>${btn||''}</main></div>`}
 function render(){
   const u=me();
+  if(LIVE){
+    const R=document.getElementById('root');
+    if(CTX.error){document.body.className='guest';R.innerHTML=vSimple('Sin','conexión.',CTX.error);return}
+    if(!CTX.ready||(CTX.slug&&!CTX.salonLoaded&&!CTX.notFound&&CTX.role!=='creator')){document.body.className='guest';R.innerHTML=`<div class="shell"><main style="padding-top:120px;text-align:center"><div class="brand">Stilista</div><p class="small muted" style="margin-top:14px">Cargando…</p></main></div>`;return}
+    if(u&&CTX.noRole){document.body.className='guest';R.innerHTML=vSimple('Cuenta sin','comercio.','Esta cuenta ('+esc(u.email)+') no tiene un comercio asignado. Si sos cliente, entrá desde el link de tu salón.','<button class="btn mt" data-a="logout" style="margin-top:24px">Cerrar sesión</button>');document.getElementById('modal').innerHTML='';return}
+    if(u&&CTX.role==='creator'){document.body.className='creator';R.innerHTML=vCreatorLive(u);document.getElementById('modal').innerHTML=ui.modal?`<div class="scrim" data-scrim="1"><div class="sheet"><div class="grab"></div>${vModal(u)}</div></div>`:'';return}
+    if(!u&&CTX.slug&&CTX.notFound){document.body.className='guest';R.innerHTML=vSimple('Link','no encontrado.','No existe un comercio con este link. Revisá que esté bien escrito.');return}
+  }
   document.body.className=(u?(u.role==='admin'?'admin':'client'):'guest')+(BAR()?' barber':'');
   document.getElementById('root').innerHTML=!u?(ui.guestShop&&!OFF()?vGuestShop():vAuth()):u.role==='creator'?vCreator(u):u.role==='admin'?(OFF()?vLocked(u):vAdmin(u)):(OFF()?vClientOff(u):vClient(u));
   document.getElementById('modal').innerHTML=ui.modal?`<div class="scrim" data-scrim="1"><div class="sheet"><div class="grab"></div>${vModal(u)}</div></div>`:'';
@@ -634,6 +873,22 @@ function render(){
 /* ============ acceso ============ */
 function vAuth(){
   const mode=ui.auth,reg=mode==='register',sal=mode==='salon';
+  if(LIVE&&!CTX.slug){
+    if(mode==='creatorReg')return `<div class="shell auth"><main><section class="auth-hero"><div class="orb"></div>
+      <button class="back" data-a="authMode" data-m="login">${ic('back',14)} Volver</button>
+      <div class="brand" style="margin-top:14px">Stilista</div><h1 class="display" style="margin-top:30px">Cuenta de<br><em>creador.</em></h1>
+      <p class="lead">Solo para el dueño del sistema. Usá el email autorizado como creador.</p></section>
+      <form data-form="creatorReg"><label class="field"><span>Email</span><input name="email" type="email" required autocapitalize="none" autocomplete="email"></label>
+      <label class="field"><span>Contraseña (mínimo 6)</span><input name="pass" type="password" minlength="6" required autocomplete="new-password"></label>
+      <button class="btn" type="submit">Crear cuenta de creador</button></form></main></div>`;
+    return `<div class="shell auth"><main><section class="auth-hero"><div class="orb"></div><div class="brand">Stilista</div>
+      <h1 class="display" style="margin-top:34px">Tu salón,<br><em>en una app.</em></h1>
+      <p class="lead">Ingresá con tu cuenta. Si sos cliente de un salón o barbería, entrá desde el link que te pasaron.</p></section>
+      <form data-form="login"><label class="field"><span>Email</span><input name="email" type="email" required autocapitalize="none" autocomplete="email"></label>
+      <label class="field"><span>Contraseña</span><input name="pass" type="password" required autocomplete="current-password"></label>
+      <button class="btn accent" type="submit">Entrar ${ic('arrow',18)}</button></form>
+      <div class="links"><span></span><button data-a="authMode" data-m="creatorReg">Soy el creador del sistema</button></div></main></div>`;
+  }
   const shopPreview=S.products.slice(0,4).map(bottle).join('');
   if(sal)return `<div class="shell auth"><main>
   <section class="auth-hero"><div class="orb"></div>
@@ -643,7 +898,7 @@ function vAuth(){
     <p class="lead">Panel para gestionar turnos, clientes, ${W('pasaporte de color','historial de cortes')} y la tienda.</p>
   </section>
   <form data-form="salonLogin" class="fade-in">
-    <label class="field"><span>Email o usuario</span><input name="user" required autocomplete="username" autocapitalize="none"></label>
+    <label class="field"><span>${LIVE?'Email':'Email o usuario'}</span><input name="user" required autocomplete="username" autocapitalize="none"></label>
     <label class="field"><span>Contraseña</span><input name="pass" type="password" required autocomplete="current-password"></label>
     <button class="btn" type="submit">${ic('cog',18)} Entrar al panel</button>
   </form></main></div>`;
@@ -658,11 +913,11 @@ function vAuth(){
   <form data-form="${reg?'register':'login'}" class="fade-in">
     ${reg?`<label class="field"><span>Nombre y apellido</span><input name="name" required autocomplete="name"></label>
     <label class="field"><span>Celular</span><input name="phone" inputmode="tel" autocomplete="tel" required placeholder="358 412-3456"></label>`:''}
-    <label class="field"><span>${reg?'Email':'Email o usuario'}</span><input name="email" type="${reg?'email':'text'}" required autocomplete="${reg?'email':'username'}" autocapitalize="none"></label>
-    <label class="field"><span>Contraseña</span><input name="pass" type="password" required ${reg?'minlength="4"':''} autocomplete="${reg?'new-password':'current-password'}"></label>
+    <label class="field"><span>${reg||LIVE?'Email':'Email o usuario'}</span><input name="email" type="${reg||LIVE?'email':'text'}" required autocomplete="${reg?'email':'username'}" autocapitalize="none"></label>
+    <label class="field"><span>Contraseña</span><input name="pass" type="password" required ${reg?'minlength="6"':''} autocomplete="${reg?'new-password':'current-password'}"></label>
     <button class="btn accent" type="submit">${reg?'Crear mi cuenta':'Entrar'} ${ic('arrow',18)}</button>
   </form>
-  <div class="links"><button data-a="demo" data-who="u1">${W('Probar como clienta demo','Probar como cliente demo')}</button><button class="acc" data-a="authMode" data-m="salon">${W('Acceso salón →','Acceso barbería →')}</button></div>
+  <div class="links">${LIVE?'<span></span>':`<button data-a="demo" data-who="u1">${W('Probar como clienta demo','Probar como cliente demo')}</button>`}<button class="acc" data-a="authMode" data-m="salon">${W('Acceso salón →','Acceso barbería →')}</button></div>
   </main></div>`;
 }
 function vGuestShop(){
@@ -1017,12 +1272,13 @@ function paySettings(){
 function aSettings(){
   const s=S.salon;
   return `<p class="eyebrow">Configuración</p><h1 class="display">Tu<br><em>${W('salón','barbería')}.</em></h1>
-  <p class="cat">Estilo de la app</p>
+  ${LIVE?`<p class="cat">Tipo de app</p><p class="small"><b>${W('Mujer · Salón','Hombre · Barbería')}</b> · lo define tu proveedor del sistema.</p>
+  <button class="btn line sm mt" data-a="askSample" data-v="${BAR()?'barber':'salon'}">Cargar servicios y productos de ejemplo</button>`:`<p class="cat">Estilo de la app</p>
   <div class="stylepick">
     <button class="stylecard ${BAR()?'':'on'}" data-a="setStyle" data-v="salon"><span class="sw"><i style="background:#F4EEE6;border:1px solid #ddd2c4"></i><i style="background:#8C2F39"></i><i style="background:#E3B5A4"></i></span><b>Mujer · Salón</b><small>Peluquería, color y uñas</small></button>
     <button class="stylecard ${BAR()?'on':''}" data-a="setStyle" data-v="barber"><span class="sw"><i style="background:#141312;border:1px solid #444"></i><i style="background:#C9973F"></i><i style="background:#EEE7DC"></i></span><b>Hombre · Barbería</b><small>Corte, degradé y barba</small></button>
   </div>
-  <button class="btn line sm" data-a="askSample" data-v="${BAR()?'barber':'salon'}">Cargar datos de ejemplo de ${W('salón','barbería')}</button>
+  <button class="btn line sm" data-a="askSample" data-v="${BAR()?'barber':'salon'}">Cargar datos de ejemplo de ${W('salón','barbería')}</button>`}
   <div class="divider"></div>
   <form data-form="settings" style="margin-top:20px">
     <label class="field"><span>${W('Nombre del salón','Nombre de la barbería')}</span><input name="name" value="${esc(s.name)}" required></label>
@@ -1030,8 +1286,8 @@ function aSettings(){
     <div class="grid2f"><label class="field"><span>Teléfono</span><input name="phone" value="${esc(s.phone||'')}"></label><label class="field"><span>Cambios hasta (hs antes)</span><input type="number" name="cancelHours" min="0" max="72" value="${s.cancelHours}"></label></div>
     <label class="field"><span>Dirección</span><input name="address" value="${esc(s.address||'')}"></label>
     <p class="cat">Acceso al panel</p>
-    <label class="field"><span>Email de acceso</span><input name="aemail" type="email" value="${esc((S.users.find(u=>u.role==='admin')||{}).email||'')}" required autocapitalize="none"></label>
-    <div class="grid2f"><label class="field"><span>Usuario</span><input name="ausername" value="${esc((S.users.find(u=>u.role==='admin')||{}).username||'')}" required autocapitalize="none"></label><label class="field"><span>Nueva contraseña</span><input name="apass" type="password" minlength="4" placeholder="Dejar vacío = igual" autocomplete="new-password"></label></div>
+    ${LIVE?`<p class="small" style="margin-bottom:10px">Entrás con <b>${esc((me()||{}).email||'')}</b>.</p><label class="field"><span>Nueva contraseña</span><input name="apass" type="password" minlength="6" placeholder="Dejar vacío = igual" autocomplete="new-password"></label>`:`<label class="field"><span>Email de acceso</span><input name="aemail" type="email" value="${esc((S.users.find(u=>u.role==='admin')||{}).email||'')}" required autocapitalize="none"></label>
+    <div class="grid2f"><label class="field"><span>Usuario</span><input name="ausername" value="${esc((S.users.find(u=>u.role==='admin')||{}).username||'')}" required autocapitalize="none"></label><label class="field"><span>Nueva contraseña</span><input name="apass" type="password" minlength="4" placeholder="Dejar vacío = igual" autocomplete="new-password"></label></div>`}
     <p class="cat">Servicios y precios</p>
     <p class="small muted" style="margin:-4px 0 10px">Son los que ${W('tus clientas','tus clientes')} eligen al pedir turno. Agrupados por categoría.</p>
     <div class="svchead"><span>Servicio</span><span>Precio</span><span>Minutos</span><span></span></div>
@@ -1042,13 +1298,15 @@ function aSettings(){
   <div class="divider"></div>
   ${paySettings()}
   <div class="divider"></div>
-  <p class="cat">Equipo</p>${S.staff.map(st=>`<div class="item"><span class="av" style="background:${st.c};color:#fff">${initials(st.name)}</span><div class="grow"><b>${esc(st.name)}</b><small>${esc(st.role)} · ${st.cats.join(', ')}</small></div></div>`).join('')}
-  <button class="btn line mt" data-a="resetDemo">Restablecer datos de demo</button>`;
+  <p class="cat">Equipo</p>${S.staff.map(st=>`<div class="item"><span class="av" style="background:${st.c};color:#fff">${initials(st.name)}</span><div class="grow"><b>${esc(st.name)}</b><small>${esc(st.role)} · ${st.cats.join(', ')}</small></div><button class="del" data-a="delStaff" data-id="${st.id}" aria-label="Quitar ${esc(st.name)}" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)">${ic('x',15)}</button></div>`).join('')}
+  <button class="btn line sm" data-a="newStaff">${ic('plus',16)} Agregar ${W('profesional','barbero')}</button>
+  ${LIVE?'':'<button class="btn line mt" data-a="resetDemo">Restablecer datos de demo</button>'}`;
 }
 
 /* ============ modales ============ */
 function vModal(u){
   const m=ui.modal;
+  if(LIVE&&CTX.role==='creator'){const h=vCreatorModal(m);if(h)return h}
   if(m.type==='notifs'){
     const to=u.role==='admin'?'admin':u.id;
     const list=S.notifs.filter(n=>n.to===to);
@@ -1062,6 +1320,7 @@ function vModal(u){
     ${u.role==='client'?`<p class="cat">Mis pedidos</p>${orders.length?orders.map(o=>`<div class="item"><div class="grow"><b>${money(o.total)}</b><small>${o.items.map(i=>i.qty+'× '+esc(prodBy(i.pid)?.name||'')).join(', ')}</small></div><span class="pill st-${o.status}">${OST[o.status]}</span></div>`).join(''):`<p class="small muted">Todavía no compraste en la tienda.</p>`}
     <p class="cat">${W('Tu salón','Tu barbería')}</p><p class="small">${esc(S.salon.name)} · ${esc(S.salon.address||'')}<br>Tel. ${esc(S.salon.phone||'')} · ${S.salon.open} a ${S.salon.close} hs</p>`:''}
     <p class="cat">Avisos en este celular</p>
+    ${LIVE&&isIOS()&&!isStandalone()?`<p class="small" style="margin-bottom:10px">En iPhone, para recibir avisos: tocá <b>Compartir</b> → <b>Agregar a inicio</b> y abrí Stilista desde ese ícono.</p>`:''}
     ${(()=>{const st=notifState();return st==='granted'?`<p class="small">${ic('check',14)} Activados: te avisamos cuando ${u.role==='admin'?'llegue una solicitud':'confirmen o cambien tu turno, y 30 minutos antes de cada turno'} mientras tengas la app abierta.</p>`:st==='denied'?`<p class="small muted">Bloqueaste los avisos en este navegador. Podés habilitarlos desde la configuración del navegador.</p>`:st==='unsupported'?`<p class="small muted">Este navegador no permite avisos. Igual los vas a ver en la campanita.</p>`:`<button class="btn line" data-a="askNotif">${ic('bellr',18)} Activar avisos</button>`})()}
     <button class="btn mt" data-a="logout" style="margin-top:22px">Cerrar sesión</button>`;
   }
@@ -1092,6 +1351,15 @@ function vModal(u){
     <a class="btn accent" href="${href}" target="_blank" rel="noopener" data-rem="${a.id}" data-k="${m.kind}">${ic('wa',18)} Enviar a ${esc(c.phone)}</a>
     <button class="btn line mt" data-a="closeModal">Listo, no hace falta</button>`;
   }
+  if(m.type==='staff'){
+    const cats=[...new Set(S.services.map(x=>x.cat))];
+    return `<h3>Agregar al <em>equipo</em></h3><form data-form="newStaff" style="margin-top:14px">
+      <label class="field"><span>Nombre</span><input name="name" required></label>
+      <label class="field"><span>Rol</span><input name="role" placeholder="${W('Colorista, Estilista, Manicura…','Barbero')}" value="${W('','Barbero')}"></label>
+      <p class="cat" style="margin-top:4px">Qué servicios hace</p>
+      <div class="tpick">${cats.map(c=>`<label class="tp" style="padding:8px 12px"><input type="checkbox" name="cat_${esc(c)}" checked style="accent-color:var(--accent)"> ${esc(c)}</label>`).join('')}</div>
+      <button class="btn accent mt" type="submit">Agregar</button></form>`;
+  }
   if(m.type==='svc'){
     const cats=[...new Set(S.services.map(x=>x.cat))];
     return `<h3>Nuevo <em>servicio</em></h3><p class="small muted">Aparece al instante cuando ${W('tus clientas piden','tus clientes piden')} turno.</p>
@@ -1121,7 +1389,7 @@ function vModal(u){
   if(m.type==='sample'){
     const b=m.v==='barber';
     return `<h3>Cargar ejemplo de <em>${b?'barbería':'salón'}</em></h3>
-    <p class="small muted" style="margin-top:6px">Reemplaza servicios, equipo, productos, ${b?'clientes':'clientas'}, turnos, pedidos e historial por datos de ejemplo de ${b?'barbería':'peluquería y uñas'}. Se mantienen el acceso del salón y los datos de pago.</p>
+    <p class="small muted" style="margin-top:6px">${LIVE?'Reemplaza servicios, equipo y productos por los de ejemplo. Tus clientes, turnos y pedidos no se tocan.':`Reemplaza servicios, equipo, productos, ${b?'clientes':'clientas'}, turnos, pedidos e historial por datos de ejemplo de ${b?'barbería':'peluquería y uñas'}. Se mantienen el acceso del salón y los datos de pago.`}</p>
     <div class="row mt" style="margin-top:18px"><button class="btn line" data-a="closeModal">Cancelar</button><button class="btn accent" data-a="doSample">Cargar ejemplo</button></div>`;
   }
   if(m.type==='payInfo'){
@@ -1217,7 +1485,7 @@ const A={
   openNotifs:()=>{ui.modal={type:'notifs'};render()},
   openProfile:()=>{ui.modal={type:'profile'};render()},
   closeModal:()=>{ui.modal=null;render()},
-  logout:()=>{S.session=null;ui.guestShop=false;ui.auth='login';ui.modal=null;ui.cart={};ui.book=null;ui.clientId=null;save();render()},
+  logout:()=>{if(LIVE){FB.authM.signOut(FB.auth);ui.modal=null;ui.cart={};ui.book=null;ui.clientId=null;ui.guestShop=false;ui.auth='login';return}S.session=null;ui.guestShop=false;ui.auth='login';ui.modal=null;ui.cart={};ui.book=null;ui.clientId=null;save();render()},
   resetDemo:()=>{try{localStorage.removeItem(KEY)}catch(e){}S=seed();ui.modal=null;ui.clientId=null;ui.cart={};render();toast('Datos de demo restablecidos')},
   // reservas
   bSvc:d=>{ui.book.serviceId=d.id;ui.book.step=1;render();scrollTo(0,0)},
@@ -1237,7 +1505,7 @@ const A={
       toast('Pedido de cambio enviado '+W('al salón','a la barbería'));
     }else{
       const note=(document.getElementById('bnote')||{}).value||'';
-      const dep=depositFor(s),na={id:uid('a'),userId:u.id,serviceId:s.id,staffId:st.id,date:b.date,time:b.time,status:'pendiente',note,created:Date.now(),deposit:dep?{amount:dep,status:'pendiente'}:null};
+      const dep=depositFor(s),na={id:uid('a'),userId:u.id,userName:u.name,serviceId:s.id,staffId:st.id,date:b.date,time:b.time,status:'pendiente',note,created:Date.now(),deposit:dep?{amount:dep,status:'pendiente'}:null};
       S.appts.push(na);if(dep)ui.modal={type:'payInfo',k:'appt',id:na.id};
       notify('admin',`${u.name} solicitó ${s.name} para el ${fd(b.date)} a las ${b.time} hs`,'plus');
       toast('¡Listo! Te avisamos cuando '+LS()+' confirme');
@@ -1268,7 +1536,10 @@ const A={
   pickOpt:(d,el)=>{const f=el.closest('form');const was=el.classList.contains('on');el.parentNode.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));if(!was)el.classList.add('on');if(f[d.f])f[d.f].value=was?'':d.v},
   setStyle:d=>{if(S.salon.style===d.v)return;S.salon.style=d.v;save();render();toast(d.v==='barber'?'Estilo Barbería activado':'Estilo Salón activado')},
   askSample:d=>{ui.modal={type:'sample',v:d.v};render()},
-  doSample:()=>{loadSample(ui.modal.v);ui.modal=null;save();render();toast('Datos de ejemplo cargados')},
+  doSample:()=>{if(LIVE){const c=catalogFor(S.salon.style);S.services=c.services;S.staff=c.staff;S.products=c.products;ui.modal=null;save();render();return toast('Servicios y productos de ejemplo cargados')}loadSample(ui.modal.v);ui.modal=null;save();render();toast('Datos de ejemplo cargados')},
+  newStaff:()=>{ui.modal={type:'staff'};render()},
+  delStaff:d=>{if(S.appts.some(a=>a.staffId===d.id&&ACTIVE.includes(a.status)&&dt(a)>Date.now()))return toast('Tiene turnos próximos: reasignalos o esperá a que pasen');
+    if(S.staff.length<=1)return toast('Tiene que quedar al menos una persona');S.staff=S.staff.filter(x=>x.id!==d.id);save();render();toast('Quitado del equipo')},
   newSvc:()=>{ui.modal={type:'svc'};render()},
   delSvc:d=>{const used=S.appts.some(a=>a.serviceId===d.id&&ACTIVE.includes(a.status));
     if(used)return toast('Tiene turnos pendientes o confirmados: cambiale el nombre o esperá a que pasen');
@@ -1284,7 +1555,7 @@ const A={
   licPaid:()=>{const L=S.license;L.history=L.history||[];L.history.unshift({ts:Date.now(),amount:L.amount,due:L.due});
     const base=today()>L.due?new Date():pISO(L.due);base.setMonth(base.getMonth()+1);L.due=iso(base);L.status='activa';L.informed=null;
     notify('admin',`Recibimos tu pago de ${APP()}. ¡Gracias! Próximo vencimiento: ${fd(L.due)}.`,'check');offerLicWa('pagado');save();render();toast('Pago registrado · servicio activo')},
-  askNotif:()=>{try{const r=Notification.requestPermission();(r&&r.then?r:Promise.resolve(Notification.permission)).then(p=>{render();toast(p==='granted'?'Avisos activados':'No se activaron los avisos')}).catch(()=>toast('Este navegador no permite avisos'))}catch(e){toast('Este navegador no permite avisos')}},
+  askNotif:()=>{if(LIVE)return enablePush(false);try{const r=Notification.requestPermission();(r&&r.then?r:Promise.resolve(Notification.permission)).then(p=>{render();toast(p==='granted'?'Avisos activados':'No se activaron los avisos')}).catch(()=>toast('Este navegador no permite avisos'))}catch(e){toast('Este navegador no permite avisos')}},
   payM:d=>{ui.payMethod=d.m;render()},
   copy:d=>{const v=d.v;try{navigator.clipboard.writeText(v).then(()=>toast('Copiado: '+v),()=>toast('Copialo a mano: '+v))}catch(e){toast('Copialo a mano: '+v)}},
   openPay:d=>{ui.modal={type:'payInfo',k:d.k,id:d.id};render()},
@@ -1304,7 +1575,7 @@ const A={
     if(!me()){ui.modal={type:'guestCheckout'};return render()}
     const u=me(),items=Object.entries(ui.cart).filter(([,q])=>q>0).map(([pid,qty])=>({pid,qty}));
     for(const i of items){if(prodBy(i.pid).stock<i.qty)return toast('Cambió el stock de '+prodBy(i.pid).name)}
-    items.forEach(i=>prodBy(i.pid).stock-=i.qty);
+    if(!LIVE)items.forEach(i=>prodBy(i.pid).stock-=i.qty);
     const total=cartTotal();
     const pm=curMethod(payMethods()),on=ONLINE.includes(pm),no={id:uid('o'),userId:u.id,items,total,status:'nuevo',ts:Date.now(),pay:{method:pm,status:on?'pendiente':'retiro'}};
     S.orders.push(no);
@@ -1341,13 +1612,16 @@ const A={
   closeClient:()=>{ui.clientId=null;render()},
   ashop:d=>{ui.ashop=d.v;render()},
   orderNext:d=>{const o=S.orders.find(x=>x.id===d.id);
-    if(o.status==='nuevo'){o.status='listo';if(o.userId)notify(o.userId,`Tu pedido de ${money(o.total)} está listo para retirar en ${S.salon.name}.`,'bag')}else o.status='entregado';
+    if(o.status==='nuevo'){o.status='listo';if(LIVE)o.items.forEach(i=>{const p=prodBy(i.pid);if(p)p.stock=Math.max(0,p.stock-i.qty)});if(o.userId)notify(o.userId,`Tu pedido de ${money(o.total)} está listo para retirar en ${S.salon.name}.`,'bag')}else o.status='entregado';
     save();render();toast(o.status==='listo'?'Se avisó '+W('a la clienta','al cliente'):'Pedido entregado')},
   stock:d=>{const p=prodBy(d.id);p.stock=Math.max(0,p.stock+Number(d.d));save();render()},
   newProduct:()=>{ui.modal={type:'product'};render()}
 };
 
 const F={
+  newStaff:d=>{const cats=Object.keys(d).filter(k=>k.startsWith('cat_')).map(k=>k.slice(4));if(!cats.length)return toast('Elegí al menos un tipo de servicio');
+    const pal=['#8C2F39','#C49A5A','#9DAE97','#7C93B5','#C9973F','#7F8C8D','#A0522D','#6f5f9e'];
+    S.staff.push({id:uid('t'),name:d.name.trim(),role:(d.role||'').trim()||W('Profesional','Barbero'),cats,c:pal[S.staff.length%pal.length]});ui.modal=null;save();render();toast('Agregado al equipo')},
   newSvc:d=>{const cat=(d.cat||'').trim()||'General';S.services.push({id:uid('s'),name:d.name.trim(),cat,dur:Number(d.dur)||30,price:Number(d.price)||0});
     S.staff.forEach(st=>{if(!st.cats.includes(cat))st.cats.push(cat)});ui.modal=null;save();render();toast('Servicio agregado')},
   licSettings:d=>{const L=S.license;L.amount=Number(d.amount)||0;if(d.due)L.due=d.due;
@@ -1364,23 +1638,36 @@ const F={
     if(p.depositOn&&!p.transfer&&!p.mp)return toast('La seña necesita transferencia o Mercado Pago activos');
     S.salon.pay=p;save();render();toast('Datos de pago guardados');
   },
-  salonLogin:d=>{const user=d.user.trim().toLowerCase();
+  creatorReg:async d=>{CTX.registering=true;try{const c=await FB.authM.createUserWithEmailAndPassword(FB.auth,d.email.trim(),d.pass);CTX.registering=false;await onAuth(c.user);
+      if(CTX.role==='creator')toast('Cuenta de creador lista');}catch(e){CTX.registering=false;toast(errMsg(e))}},
+  salonLogin:d=>{if(LIVE)return F.login({email:d.user,pass:d.pass});const user=d.user.trim().toLowerCase();
     const u=S.users.find(x=>(x.role==='admin'||x.role==='creator')&&(String(x.username||'').toLowerCase()===user||x.email.toLowerCase()===user)&&x.pass===d.pass);
     if(!u)return toast('Usuario o contraseña incorrectos');S.session=u.id;ui.atab='agenda';ui.auth='login';save();render();toast('Bienvenido al panel')},
   guestOrder:d=>{
     const items=Object.entries(ui.cart).filter(([,q])=>q>0).map(([pid,qty])=>({pid,qty}));
     if(!items.length){ui.modal=null;return render()}
     for(const i of items){if(prodBy(i.pid).stock<i.qty)return toast('Cambió el stock de '+prodBy(i.pid).name)}
-    items.forEach(i=>prodBy(i.pid).stock-=i.qty);
+    if(!LIVE)items.forEach(i=>prodBy(i.pid).stock-=i.qty);
     const total=cartTotal(),o={id:uid('o'),userId:null,guest:{name:d.name.trim(),phone:d.phone.trim(),email:d.email||''},items,total,status:'nuevo',ts:Date.now(),pay:{method:curMethod(payMethods()),status:ONLINE.includes(ui.payMethod)?'pendiente':'retiro'}};
     S.orders.push(o);
     notify('admin',`Nuevo pedido online de ${o.guest.name} (sin cuenta) · ${money(total)} · Tel. ${o.guest.phone}`,'bag');
     ui.cart={};ui.modal={type:'orderOk',id:o.id};save();render();
   },
-  login:d=>{const id=d.email.trim().toLowerCase();
+  login:d=>{if(LIVE){FB.authM.signInWithEmailAndPassword(FB.auth,d.email.trim(),d.pass).then(()=>{ui.tab='home';ui.atab='agenda';ui.auth='login'}).catch(e=>toast(errMsg(e)));return}
+    const id=d.email.trim().toLowerCase();
     const u=S.users.find(x=>(x.email.toLowerCase()===id||String(x.username||'').toLowerCase()===id)&&x.pass===d.pass);
     if(!u)return toast('Email/usuario o contraseña incorrectos');S.session=u.id;ui.tab='home';ui.atab='agenda';save();render();toast(u.role==='admin'?'Bienvenido al panel':'Hola, '+first(u.name))},
-  register:d=>{const email=d.email.trim().toLowerCase();
+  register:async d=>{const email=d.email.trim().toLowerCase();
+    if(LIVE){if(!CTX.sid||CTX.notFound)return toast('Entrá desde el link de tu salón para crear la cuenta');
+      CTX.registering=true;
+      try{const c=await FB.authM.createUserWithEmailAndPassword(FB.auth,email,d.pass);const uid_=c.user.uid,name=d.name.trim(),phone=d.phone||'';
+        await FB.fs.setDoc(FB.fs.doc(FB.db,'users',uid_),{role:'client',salonId:CTX.sid,name,email,phone,since:today()});
+        await FB.fs.setDoc(FB.fs.doc(FB.db,'salons',CTX.sid,'members',uid_),{name,email,phone,since:today()});
+        CTX.registering=false;await onAuth(c.user);
+        notify('admin',`${W('Nueva clienta registrada','Nuevo cliente registrado')}: ${name}`,'users');
+        notify(uid_,`¡${W('Bienvenida','Bienvenido')} a ${S.salon.name}! Ya podés reservar tu primer turno.`,'sparkle');
+        ui.tab='home';save();render();toast('Cuenta creada')}
+      catch(e){CTX.registering=false;toast(errMsg(e))}return}
     if(S.users.some(x=>x.email.toLowerCase()===email))return toast('Ya existe una cuenta con ese email');
     const u={id:uid('u'),email,pass:d.pass,name:d.name.trim(),phone:d.phone||'',role:'client',since:today()};
     S.users.push(u);S.session=u.id;
@@ -1399,6 +1686,7 @@ const F={
   product:d=>{S.products.push({id:uid('p'),name:d.name,brand:d.brand,cat:d.cat,price:Number(d.price),stock:Number(d.stock),c:d.c,shape:d.shape});ui.modal=null;save();render();toast('Producto agregado')},
   settings:d=>{Object.assign(S.salon,{name:d.name,open:d.open,close:d.close,phone:d.phone,address:d.address,cancelHours:Number(d.cancelHours)||0});
     S.services.forEach(x=>{if(d['sname_'+x.id])x.name=d['sname_'+x.id];if(d['sprice_'+x.id]!==undefined)x.price=Number(d['sprice_'+x.id])||0;if(d['sdur_'+x.id])x.dur=Number(d['sdur_'+x.id])||x.dur});
+    if(LIVE){if(d.apass&&d.apass.length>=6)FB.authM.updatePassword(FB.auth.currentUser,d.apass).then(()=>toast('Contraseña cambiada')).catch(e=>toast(errMsg(e)));save();render();return toast('Cambios guardados')}
     const adm=S.users.find(u=>u.role==='admin');if(adm){const em=(d.aemail||'').trim().toLowerCase();if(em&&S.users.some(u=>u!==adm&&u.email.toLowerCase()===em))return toast('Ese email ya lo usa una clienta');if(em)adm.email=em;adm.username=d.ausername.trim().toLowerCase();if(d.apass&&d.apass.length>=4)adm.pass=d.apass}
     save();render();toast('Cambios guardados')}
 };
@@ -1409,12 +1697,12 @@ document.addEventListener('click',e=>{
   if(rem){const a=getA(rem.dataset.rem);if(a&&rem.dataset.k==='recordatorio'){a.reminded=true;save()}
     if(ui.modal&&/^wa/.test(ui.modal.type))ui.modal=null;setTimeout(()=>{render();toast('WhatsApp abierto con el mensaje listo')},400);return}
   const el=e.target.closest('[data-a]');if(!el)return;
-  const fn=A[el.dataset.a];if(fn){e.preventDefault();fn(el.dataset,el)}
+  const fn=A[el.dataset.a]||CA[el.dataset.a];if(fn){e.preventDefault();fn(el.dataset,el)}
 });
-document.addEventListener('submit',e=>{const f=e.target.closest('[data-form]');if(!f)return;e.preventDefault();const fn=F[f.dataset.form];if(fn)fn(Object.fromEntries(new FormData(f)),f)});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-form]');if(!f)return;e.preventDefault();const fn=F[f.dataset.form]||CF[f.dataset.form];if(fn)fn(Object.fromEntries(new FormData(f)),f)});
 document.addEventListener('input',e=>{if(e.target.dataset.in==='clientQ'){ui.clientQ=e.target.value;const l=document.getElementById('clist');if(l)l.innerHTML=clientRows()}});
 render();
-checkReminders();
+if(LIVE)initLive();else checkReminders();
 setInterval(()=>{checkReminders();const u=me();if(u&&!ui.modal&&!document.querySelector('input:focus,textarea:focus,select:focus')&&((u.role==='client'&&ui.tab==='home')||(u.role==='admin'&&ui.atab==='agenda')))render()},60000);
 </script>
 </body>

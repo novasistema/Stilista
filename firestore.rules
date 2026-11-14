@@ -1,0 +1,74 @@
+rules_version = '2';
+// Reglas de seguridad de Stilista. Reemplazá EMAIL_DEL_CREADOR por tu email de creador.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function isCreator() { return signed() && request.auth.token.email == 'EMAIL_DEL_CREADOR'; }
+    function hasProfile() { return signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function prof() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isAdminOf(sid) { return hasProfile() && prof().role == 'admin' && prof().salonId == sid; }
+    function isMemberOf(sid) { return hasProfile() && prof().salonId == sid; }
+
+    match /users/{uid} {
+      allow read: if isCreator() || (signed() && request.auth.uid == uid) || isAdminOf(resource.data.salonId);
+      allow create: if isCreator() || (signed() && request.auth.uid == uid && request.resource.data.role == 'client');
+      allow update: if isCreator() || (signed() && request.auth.uid == uid
+                      && request.resource.data.role == resource.data.role
+                      && request.resource.data.salonId == resource.data.salonId);
+      allow delete: if isCreator();
+    }
+
+    match /salons/{sid} {
+      allow read: if true;
+      allow create, delete: if isCreator();
+      allow update: if isCreator() || (isAdminOf(sid) && request.resource.data.salon.style == resource.data.salon.style);
+
+      match /members/{uid} {
+        allow read: if isCreator() || isAdminOf(sid) || (signed() && request.auth.uid == uid);
+        allow write: if isCreator() || isAdminOf(sid) || (signed() && request.auth.uid == uid);
+      }
+      match /slots/{id} {
+        allow read: if true;
+        allow write: if isCreator() || isMemberOf(sid);
+      }
+      match /appts/{id} {
+        allow read: if isCreator() || isAdminOf(sid) || (signed() && resource.data.userId == request.auth.uid);
+        allow create: if isAdminOf(sid) || (isMemberOf(sid) && request.resource.data.userId == request.auth.uid && request.resource.data.status == 'pendiente');
+        allow update: if isCreator() || isAdminOf(sid) || (signed()
+                      && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid
+                      && (request.resource.data.status == resource.data.status
+                          || request.resource.data.status in ['pendiente', 'cancelado']
+                          || (resource.data.status == 'propuesto' && request.resource.data.status == 'confirmado')));
+      }
+      match /records/{id} {
+        allow read: if isCreator() || isAdminOf(sid) || (signed() && resource.data.userId == request.auth.uid);
+        allow write: if isAdminOf(sid);
+      }
+      match /orders/{id} {
+        allow read: if isCreator() || isAdminOf(sid) || (signed() && resource.data.userId == request.auth.uid);
+        allow create: if request.resource.data.status == 'nuevo'
+                      && (request.resource.data.userId == null || (signed() && request.resource.data.userId == request.auth.uid));
+        allow update: if isAdminOf(sid) || (signed() && resource.data.userId == request.auth.uid && request.resource.data.status == resource.data.status);
+      }
+      match /notifs/{id} {
+        allow read: if isCreator() || (isAdminOf(sid) && resource.data.to == 'admin') || (signed() && resource.data.to == request.auth.uid);
+        allow create: if isCreator() || isAdminOf(sid) || request.resource.data.to == 'admin'
+                      || (signed() && request.resource.data.to == request.auth.uid);
+        allow update: if isCreator() || (isAdminOf(sid) && resource.data.to == 'admin') || (signed() && resource.data.to == request.auth.uid);
+      }
+    }
+
+    match /licenses/{sid} {
+      allow read: if true;
+      allow write: if isCreator();
+      allow update: if isAdminOf(sid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['informed']);
+    }
+    match /creatorNotifs/{id} {
+      allow read, update: if isCreator();
+      allow create: if signed();
+    }
+    match /creatorTokens/{uid} {
+      allow read, write: if isCreator();
+    }
+  }
+}
