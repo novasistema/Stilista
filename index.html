@@ -548,7 +548,7 @@ function apptMsg(kind,a,extra){
     recordatorio:`Hola ${n}! ⏰ Te recordamos tu turno de hoy a las ${a.time} hs: ${s.name}${with_} en ${sal}. ¡Te esperamos!`
   };return m[kind]||'';
 }
-function offerWa(a,kind,extra){const c=userBy(a.userId);const t=apptMsg(kind,a,extra);if(c.phone&&t){ui.modal={type:'wa',id:a.id,kind,text:t}}else ui.modal=null}
+function offerWa(a,kind,extra){ui.modal=null;return;const c=userBy(a.userId);const t=apptMsg(kind,a,extra);if(c.phone&&t){ui.modal={type:'wa',id:a.id,kind,text:t}}else ui.modal=null}
 function minsTo(a){return Math.round((dt(a)-Date.now())/60000)}
 function checkReminders(){
   const u=me();if(!u||u.role!=='client')return;let changed=false;
@@ -657,7 +657,7 @@ function vAuth(){
   <div class="seg"><button data-a="authMode" data-m="login" class="${reg?'':'on'}">Ingresar</button><button data-a="authMode" data-m="register" class="${reg?'on':''}">Crear cuenta</button></div>
   <form data-form="${reg?'register':'login'}" class="fade-in">
     ${reg?`<label class="field"><span>Nombre y apellido</span><input name="name" required autocomplete="name"></label>
-    <label class="field"><span>Celular (WhatsApp, para avisarte de tu turno)</span><input name="phone" inputmode="tel" autocomplete="tel" required placeholder="358 412-3456"></label>`:''}
+    <label class="field"><span>Celular</span><input name="phone" inputmode="tel" autocomplete="tel" required placeholder="358 412-3456"></label>`:''}
     <label class="field"><span>${reg?'Email':'Email o usuario'}</span><input name="email" type="${reg?'email':'text'}" required autocomplete="${reg?'email':'username'}" autocapitalize="none"></label>
     <label class="field"><span>Contraseña</span><input name="pass" type="password" required ${reg?'minlength="4"':''} autocomplete="${reg?'new-password':'current-password'}"></label>
     <button class="btn accent" type="submit">${reg?'Crear mi cuenta':'Entrar'} ${ic('arrow',18)}</button>
@@ -884,6 +884,11 @@ function vCreator(u){
   <div class="req" style="margin-top:18px">
    <div class="who"><span class="av">${initials(S.salon.name)}</span><div style="flex:1"><b>${esc(S.salon.name)}</b><div class="small muted">${W('Salón','Barbería')} · ${esc(adm.email||'')}${S.salon.phone?' · '+esc(S.salon.phone):''}</div></div><span class="pill lic-${st}">${LIC[st]}</span></div>
    <div class="kpis"><div class="kpi"><b style="font-size:24px;line-height:1.3">${money(L.amount)}</b><span>abono</span></div><div class="kpi"><b style="font-size:24px;line-height:1.3">${fd(L.due)}</b><span>${today()>L.due?'vencido':'vence'}</span></div><div class="kpi"><b>${nCl}</b><span>clientes · ${nAp} turnos/30d</span></div></div>
+   <p class="cat" style="margin-top:14px">Tipo de app para este cliente</p>
+   <div class="stylepick">
+    <button class="stylecard ${BAR()?'':'on'}" data-a="setStyle" data-v="salon"><span class="sw"><i style="background:#F4EEE6;border:1px solid #ddd2c4"></i><i style="background:#8C2F39"></i><i style="background:#E3B5A4"></i></span><b>Mujer · Salón</b><small>Peluquería, color y uñas</small></button>
+    <button class="stylecard ${BAR()?'on':''}" data-a="setStyle" data-v="barber"><span class="sw"><i style="background:#141312;border:1px solid #444"></i><i style="background:#C9973F"></i><i style="background:#EEE7DC"></i></span><b>Hombre · Barbería</b><small>Corte, degradé y barba</small></button>
+   </div>
    ${L.informed?`<p class="paytag pt-informado">Informó un pago ${rel(L.informed)} · verificalo</p>`:''}
    <div class="row mt">${btns}</div>
    ${st!=='suspendida'?`<button class="btn line mt" data-a="licAskSuspend" style="color:#c0392b;border-color:#c0392b">Suspender por falta de pago</button>`:`<p class="small muted mt">Suspendido: ${W('el salón','la barbería')} ve la pantalla de pago y sus clientes no pueden reservar.</p>`}
@@ -905,7 +910,7 @@ function licMsg(kind){const L=S.license,n=S.salon.name;
   return kind==='aviso'?`Hola ${n}! Te recordamos que el abono de ${APP()} (${money(L.amount)}) vence${today()>L.due?'ió':''} el ${fd(L.due)}. Podés pagarlo desde el aviso en el panel. Si ya lo pagaste, avisame. ¡Gracias!`
    :kind==='suspendida'?`Hola ${n}. El servicio de ${APP()} quedó suspendido por falta de pago (${money(L.amount)}). Apenas se acredite el pago lo reactivo. Cualquier duda escribime.`
    :`Hola ${n}! Recibí tu pago de ${APP()}, ¡gracias! El servicio sigue activo. Próximo vencimiento: ${fd(L.due)}.`}
-function offerLicWa(kind){if(S.salon.phone)ui.modal={type:'waRaw',phone:S.salon.phone,text:licMsg(kind),title:'Avisar por <em>WhatsApp</em>',who:S.salon.name};else ui.modal=null}
+function offerLicWa(kind){ui.modal=null;return;if(S.salon.phone)ui.modal={type:'waRaw',phone:S.salon.phone,text:licMsg(kind),title:'Avisar por <em>WhatsApp</em>',who:S.salon.name};else ui.modal=null}
 function vAdmin(u){
   const scr={agenda:aAgenda,clientes:aClients,shop:aShop,ajustes:aSettings}[ui.atab]||aAgenda;
   const ls=licState(),L=S.license;
@@ -925,13 +930,12 @@ function aAgenda(){
   return `<p class="eyebrow">${DAYSL[d.getDay()]}</p><h1 class="display">${d.getDate()} de<br><em>${MONL[d.getMonth()]}.</em></h1>
   <div class="kpis"><div class="kpi"><b>${todayN}</b><span>turnos hoy</span></div><div class="kpi"><b style="color:var(--accent)">${pend.length}</b><span>por confirmar</span></div><div class="kpi"><b>${newOrders}</b><span>pedidos nuevos</span></div></div>
   ${pend.length?`<h2 class="sec"><span>Solicitudes <span class="count">${pend.length}</span></span></h2>${pend.map(reqCard).join('')}`:''}
-  ${remindersBox()}
   <h2 class="sec">Agenda</h2>
   <div class="ribbon">${days.map(x=>{const dd=pISO(x);return `<button class="day ${x===ui.aday?'on':''} ${isOpen(x)?'':'off'}" data-a="aDay" data-d="${x}">${DAYS[dd.getDay()]}<b>${dd.getDate()}</b>${hasAppt(x)?'<span class="c"></span>':''}</button>`}).join('')}</div>
   <div style="margin-top:10px">${dayList.length?dayList.map(a=>{const st=staffBy(a.staffId),cl=userBy(a.userId),s=svc(a.serviceId);
     return `<div class="item ${a.status==='realizado'?'done':''}"><span class="bar" style="--c:${st?.c||'#999'}"></span><div class="timebox">${a.time}</div>
     <div class="grow"><b>${esc(cl.name)}</b><small>${esc(s.name)} · ${esc(st?.name||'')}${a.status==='propuesto'?' · esperando respuesta':''}${a.deposit?' · '+DST[a.deposit.status]:''}</small></div>
-    ${a.status==='confirmado'?`<div class="row" style="flex-wrap:nowrap">${userBy(a.userId).phone?`<a class="btn sm line" href="${waText(userBy(a.userId).phone,apptMsg('recordatorio',a))}" target="_blank" rel="noopener" data-rem="${a.id}" data-k="recordatorio" title="Recordatorio por WhatsApp" aria-label="Recordatorio por WhatsApp" style="${a.reminded?'opacity:.45':''}">${ic('wa',16)}</a>`:''}<button class="btn sm" data-a="done" data-id="${a.id}" title="Marcar realizado">${ic('check',16)}</button><button class="btn sm line" data-a="askCancel" data-id="${a.id}" title="Cancelar">${ic('x',16)}</button></div>`:`<span class="pill st-${a.status}">${a.status==='realizado'?'Hecho':'Propuesto'}</span>`}</div>`}).join('')
+    ${a.status==='confirmado'?`<div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-a="done" data-id="${a.id}" title="Marcar realizado">${ic('check',16)}</button><button class="btn sm line" data-a="askCancel" data-id="${a.id}" title="Cancelar">${ic('x',16)}</button></div>`:`<span class="pill st-${a.status}">${a.status==='realizado'?'Hecho':'Propuesto'}</span>`}</div>`}).join('')
     :`<div class="empty"><div class="big">${isOpen(ui.aday)?'Día libre':'Cerrado'}</div>${isOpen(ui.aday)?'No hay turnos confirmados.':''}</div>`}</div>`;
 }
 function remindersBox(){
@@ -1015,8 +1019,8 @@ function aSettings(){
   return `<p class="eyebrow">Configuración</p><h1 class="display">Tu<br><em>${W('salón','barbería')}.</em></h1>
   <p class="cat">Estilo de la app</p>
   <div class="stylepick">
-    <button class="stylecard ${BAR()?'':'on'}" data-a="setStyle" data-v="salon"><span class="sw"><i style="background:#F4EEE6;border:1px solid #ddd2c4"></i><i style="background:#8C2F39"></i><i style="background:#E3B5A4"></i></span><b>Salón</b><small>Peluquería, color y uñas</small></button>
-    <button class="stylecard ${BAR()?'on':''}" data-a="setStyle" data-v="barber"><span class="sw"><i style="background:#141312;border:1px solid #444"></i><i style="background:#C9973F"></i><i style="background:#EEE7DC"></i></span><b>Barbería</b><small>Corte, degradé y barba</small></button>
+    <button class="stylecard ${BAR()?'':'on'}" data-a="setStyle" data-v="salon"><span class="sw"><i style="background:#F4EEE6;border:1px solid #ddd2c4"></i><i style="background:#8C2F39"></i><i style="background:#E3B5A4"></i></span><b>Mujer · Salón</b><small>Peluquería, color y uñas</small></button>
+    <button class="stylecard ${BAR()?'on':''}" data-a="setStyle" data-v="barber"><span class="sw"><i style="background:#141312;border:1px solid #444"></i><i style="background:#C9973F"></i><i style="background:#EEE7DC"></i></span><b>Hombre · Barbería</b><small>Corte, degradé y barba</small></button>
   </div>
   <button class="btn line sm" data-a="askSample" data-v="${BAR()?'barber':'salon'}">Cargar datos de ejemplo de ${W('salón','barbería')}</button>
   <div class="divider"></div>
@@ -1313,7 +1317,7 @@ const A={
   aDay:d=>{ui.aday=d.d;render()},
   accept:d=>{const a=getA(d.id),s=svc(a.serviceId);a.status='confirmado';a.change=false;
     notify(a.userId,`¡Tu turno está confirmado! ${s.name} el ${fd(a.date)} a las ${a.time} hs con ${staffBy(a.staffId)?.name||'el equipo'}.`,'check');
-    offerWa(a,'confirmado');save();render();toast('Turno confirmado · aviso en la app enviado')},
+    offerWa(a,'confirmado');save();render();toast('Turno confirmado · se le avisó en la app')},
   reject:d=>{const a=getA(d.id),s=svc(a.serviceId);
     if(a.change&&a.prev){Object.assign(a,{date:a.prev.date,time:a.prev.time,status:'confirmado',change:false});
       notify(a.userId,`No pudimos pasar tu ${s.name} al nuevo horario. Tu turno sigue el ${fd(a.date)} a las ${a.time} hs.`,'cal');}
