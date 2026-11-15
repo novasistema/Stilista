@@ -513,7 +513,7 @@ const FB_CONFIG={apiKey:"AIzaSyAWm7HIsDcshGwjfXee_F_rojKmA0Isj4o",authDomain:"st
 const VAPID="BFJRiBYZ_DlozQbUeG8g3KchH2H2Rsfe2f2eRPp5WKkwOOgb1tvn5UEXVZCfN6NHrRQYKjIERiSNEJVXIWR9Z4A";
 const FBV='https://www.gstatic.com/firebasejs/10.12.2/';
 let FB=null;const synced={};let unsubs=[],salonUnsubs=[],pendingRender=false;const seenNotifs=new Set();const bootTs=Date.now();
-const C={salons:[],lic:{},notifs:[]};
+const C={salons:[],lic:{},notifs:[],admins:{}};
 function stable(o){if(o===null||typeof o!=='object')return JSON.stringify(o);if(Array.isArray(o))return '['+o.map(stable).join(',')+']';return '{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}'}
 const clean=o=>JSON.parse(JSON.stringify(o));
 function livePay(){return {cash:true,debit:true,transfer:false,mp:false,alias:'',cbu:'',holder:'',bank:'',cuit:'',mpLink:'',depositOn:false,depositPct:30,note:''}}
@@ -610,6 +610,7 @@ async function onAuth(user){
 function attachCreator(uid){
   const {fs,db}=FB;
   unsubs.push(fs.onSnapshot(fs.collection(db,'salons'),q=>{C.salons=q.docs.map(d=>({...d.data(),id:d.id}));schedRender()},e=>console.warn(e)));
+  unsubs.push(fs.onSnapshot(fs.query(fs.collection(db,'users'),fs.where('role','==','admin')),q=>{C.admins={};q.docs.forEach(d=>{const x=d.data();C.admins[x.salonId]={uid:d.id,email:x.email}});schedRender()},e=>console.warn(e)));
   unsubs.push(fs.onSnapshot(fs.collection(db,'licenses'),q=>{C.lic={};q.docs.forEach(d=>C.lic[d.id]=Object.assign(defaultLicense(),d.data()));schedRender()},e=>console.warn(e)));
   unsubs.push(fs.onSnapshot(fs.query(fs.collection(db,'creatorNotifs'),fs.orderBy('ts','desc'),fs.limit(40)),q=>{S.notifs=q.docs.map(d=>({...d.data(),id:d.id,to:uid}));
     S.notifs.forEach(n=>{if(!seenNotifs.has(n.id)){seenNotifs.add(n.id);if(!n.read&&n.ts>bootTs){toast(n.text);pushLocal(n.text)}}});schedRender()},e=>console.warn(e)));
@@ -649,7 +650,8 @@ function vCreatorLive(u){
     return `<div class="req" style="margin-top:14px">
     <div class="who"><span class="av">${initials(s.salon?.name||s.id)}</span><div style="flex:1;min-width:0"><b>${esc(s.salon?.name||s.id)}</b><div class="small muted" style="overflow-wrap:anywhere">${esc(link.replace(/^https?:\/\//,''))}</div></div><span class="pill lic-${ls}">${LIC[ls]}</span></div>
     <div class="row mt" style="flex-wrap:wrap"><button class="fchip ${bar?'':'on'}" data-a="cStyle" data-sid="${s.id}" data-v="salon">Mujer · Salón</button><button class="fchip ${bar?'on':''}" data-a="cStyle" data-sid="${s.id}" data-v="barber">Hombre · Barbería</button><button class="fchip" data-a="copy" data-v="${esc(link)}">Copiar link</button></div>
-    <div class="small" style="margin-top:12px">Abono <b>${money(L.amount)}</b> · ${today()>L.due?'venció':'vence'} el <b>${fd(L.due)}</b></div>
+    <div class="small" style="margin-top:12px">Administrador: <b>${esc((C.admins[s.id]||{}).email||'—')}</b></div>
+    <div class="small" style="margin-top:4px">Abono <b>${money(L.amount)}</b> · ${today()>L.due?'venció':'vence'} el <b>${fd(L.due)}</b></div>
     ${L.informed?`<p class="paytag pt-informado">Informó un pago ${rel(L.informed)} · verificalo</p>`:''}
     <div class="row mt"><button class="btn accent" data-a="cPaid" data-sid="${s.id}">${ic('check',16)} ${ls==='suspendida'?'Pago y reactivar':'Registrar pago'}</button>${ls!=='suspendida'?`<button class="btn line" data-a="cWarn" data-sid="${s.id}">${ls==='aviso'?'Reenviar aviso':'Avisar que pague'}</button>`:''}</div>
     ${ls!=='suspendida'?`<button class="btn line mt" data-a="cAskSuspend" data-sid="${s.id}" style="color:#c0392b;border-color:#c0392b">Suspender por falta de pago</button>`:''}
@@ -657,6 +659,7 @@ function vCreatorLive(u){
       <form data-form="cLic" style="margin-top:10px"><input type="hidden" name="sid" value="${s.id}">
       <div class="grid2f"><label class="field"><span>Abono mensual</span><input name="amount" type="number" min="0" step="100" value="${L.amount}"></label><label class="field"><span>Vence</span><input name="due" type="date" value="${L.due}"></label></div>
       <button class="btn line sm" type="submit">Guardar</button></form></details>
+    <div class="row mt" style="flex-wrap:wrap"><button class="fchip" data-a="cAskPass" data-sid="${s.id}">${ic('cog',14)} Cambiar contraseña del admin</button><button class="fchip" data-a="cAskDelete" data-sid="${s.id}" style="color:#c0392b;border-color:#c0392b">${ic('x',14)} Eliminar comercio</button></div>
     </div>`}).join('')}
   <p class="cat">Tus datos de cobro</p>
   <p class="small muted" style="margin:-4px 0 10px">Los ven tus comercios cuando tienen que pagarte el abono.</p>
@@ -672,7 +675,12 @@ function vCreatorLive(u){
 }
 function slugify(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)}
 function catalogFor(style){if(style==='barber'){const b=seedBarber();return {services:b.services,staff:b.staff,products:b.products}}const x=seed();return {services:x.services,staff:x.staff,products:x.products}}
+async function creatorApi(body){const t=await FB.auth.currentUser.getIdToken();const r=await fetch('/api/creator',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(body)});
+  let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||('Error '+r.status));return j}
+const genPass=()=>{const c='abcdefghjkmnpqrstuvwxyz23456789';let p='';for(let i=0;i<8;i++)p+=c[Math.floor(Math.random()*c.length)];return p};
 const CA={
+  cAskPass:d=>{ui.modal={type:'cPass',sid:d.sid,pw:genPass()};render()},
+  cAskDelete:d=>{ui.modal={type:'cDelete',sid:d.sid};render()},
   cNew:()=>{ui.modal={type:'cNew'};render()},
   cStyle:async d=>{try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'salons',d.sid),{'salon.style':d.v});toast(d.v==='barber'?'Ahora es Hombre · Barbería':'Ahora es Mujer · Salón')}catch(e){toast(errMsg(e))}},
   cWarn:async d=>{const L=licOf(d.sid);try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',d.sid),{status:L.status==='suspendida'?'suspendida':'aviso',warnedAt:Date.now()});
@@ -685,6 +693,10 @@ const CA={
       await adminNotifyFromCreator(d.sid,`Recibimos tu pago de Stilista. ¡Gracias! Próximo vencimiento: ${fd(due)}.`,'check');toast('Pago registrado · activo hasta el '+fd(due))}catch(e){toast(errMsg(e))}}
 };
 const CF={
+  cPass:async d=>{const sid=d.sid,pw=d.pw.trim();if(pw.length<6)return toast('Mínimo 6 caracteres');toast('Cambiando contraseña…');
+    try{const j=await creatorApi({action:'setPassword',sid,password:pw});ui.modal={type:'cPassOk',sid,email:j.email,pw};render()}catch(e){toast(e.message)}},
+  cDelete:async d=>{const sid=d.sid,s=C.salons.find(x=>x.id===sid);if((d.confirm||'').trim().toUpperCase()!=='ELIMINAR')return toast('Escribí ELIMINAR para confirmar');
+    toast('Eliminando…');try{const j=await creatorApi({action:'delete',sid});ui.modal=null;render();toast(`${(s&&s.salon&&s.salon.name)||sid} eliminado · ${j.deletedUsers} cuentas borradas`)}catch(e){toast(e.message)}},
   cNew:async d=>{
     const slug=slugify(d.slug||d.name);if(slug.length<2)return toast('Elegí un link más largo');
     const {fs,db,app,authM}=FB;
@@ -698,7 +710,7 @@ const CF={
       await fs.setDoc(fs.doc(db,'users',uidNew),{role:'admin',salonId:slug,email:d.email.trim().toLowerCase(),name:d.name.trim()});
       await fs.setDoc(fs.doc(db,'salons',slug),{salon:{name:d.name.trim(),style:d.style,open:'09:00',close:'20:00',cancelHours:3,phone:d.phone||'',address:'',pay:livePay()},services:cat.services,staff:cat.staff,products:cat.products,ownerUid:uidNew,createdAt:Date.now()});
       await fs.setDoc(fs.doc(db,'licenses',slug),{status:'activa',due:d.due||iso(addD(new Date(),30)),amount:Number(d.amount)||0,informed:null,pay:P,history:[]});
-      ui.modal={type:'cCreated',slug,email:d.email.trim(),name:d.name.trim()};render();
+      ui.modal={type:'cCreated',slug,email:d.email.trim(),name:d.name.trim(),pass:d.pass};render();
     }catch(e){toast(errMsg(e))}
   },
   cLic:async d=>{try{await FB.fs.updateDoc(FB.fs.doc(FB.db,'licenses',d.sid),{amount:Number(d.amount)||0,due:d.due});toast('Guardado')}catch(e){toast(errMsg(e))}},
@@ -721,9 +733,22 @@ function vCreatorModal(m){
       <button class="btn accent" type="submit">Crear comercio</button></form>`;
   if(m.type==='cCreated'){const link=location.origin+'/'+m.slug;
     return `<h3>¡Comercio <em>creado!</em></h3><p class="small muted">${esc(m.name)} ya tiene su app con servicios y productos de ejemplo para editar.</p>
-    <div class="paybox">${pl('Link',link)}${pl('Admin',m.email)}</div>
+    <div class="paybox">${pl('Link',link)}${pl('Admin',m.email)}${pl('Clave',m.pass)}</div>
+    <p class="small muted">Anotá la contraseña ahora: después no se puede volver a ver, solo cambiarla.</p>
     <p class="small">Pasale el link al comercio. Entra con ese email y la contraseña que pusiste, desde "Acceso" en su link.</p>
     <button class="btn mt" data-a="closeModal">Listo</button>`}
+  if(m.type==='cPass'){const s=C.salons.find(x=>x.id===m.sid);return `<h3>Nueva <em>contraseña</em></h3>
+    <p class="small muted">Para el administrador de ${esc(s?.salon?.name||m.sid)} (${esc((C.admins[m.sid]||{}).email||'')}). La anterior deja de funcionar.</p>
+    <form data-form="cPass" style="margin-top:14px"><input type="hidden" name="sid" value="${m.sid}">
+    <label class="field"><span>Nueva contraseña</span><input name="pw" value="${esc(m.pw)}" minlength="6" required autocapitalize="none"></label>
+    <button class="btn accent" type="submit">Guardar contraseña</button></form>`}
+  if(m.type==='cPassOk')return `<h3>Contraseña <em>cambiada</em></h3><div class="paybox">${pl('Email',m.email)}${pl('Clave',m.pw)}</div>
+    <p class="small muted">Pasale estos datos al comercio. Entra desde su link, en "Acceso".</p><button class="btn mt" data-a="closeModal">Listo</button>`;
+  if(m.type==='cDelete'){const s=C.salons.find(x=>x.id===m.sid);return `<h3>Eliminar <em>comercio</em></h3>
+    <p class="small" style="margin-top:6px">Se borra <b>${esc(s?.salon?.name||m.sid)}</b> por completo: servicios, productos, turnos, pedidos, historial, su administrador y las cuentas de sus clientes. <b>No se puede deshacer.</b></p>
+    <form data-form="cDelete" style="margin-top:14px"><input type="hidden" name="sid" value="${m.sid}">
+    <label class="field"><span>Escribí ELIMINAR para confirmar</span><input name="confirm" required autocapitalize="characters" autocomplete="off"></label>
+    <div class="row"><button type="button" class="btn line" data-a="closeModal">Cancelar</button><button class="btn" type="submit" style="background:#c0392b;color:#fff">Eliminar</button></div></form>`}
   if(m.type==='cSuspend'){const s=C.salons.find(x=>x.id===m.sid);return `<h3>¿Suspender <em>el servicio?</em></h3><p class="small muted" style="margin-top:6px">${esc(s?.salon?.name||m.sid)} va a ver una pantalla para pagar y sus clientes no van a poder sacar turnos ni comprar hasta que lo reactives. No se borra ningún dato.</p>
     <div class="row mt" style="margin-top:18px"><button class="btn line" data-a="closeModal">Cancelar</button><button class="btn" data-a="cSuspend" style="background:#c0392b;color:#fff">Suspender</button></div>`}
   return '';
